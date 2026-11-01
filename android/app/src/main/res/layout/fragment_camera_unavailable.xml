@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/view_top_bar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:background="@drawable/bg_tile"
+                android:backgroundTint="@color/skeleton"
+                android:contentDescription="@string/camera_access_is_off">
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="@string/camera_access_is_off" android:textColor="@color/text_primary" android:textSize="14sp" />
+            </FrameLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/allow_access_to_practice" android:textColor="@color/text_primary" android:textSize="28sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/enable_camera_access_in_your" android:textColor="@color/text_secondary" android:textSize="15sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_settings" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/open_camera_settings" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_watch" style="?attr/materialButtonOutlinedStyle" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="8dp" android:text="@string/watch_the_lesson_instead" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: the camera keeps the left side at full height; the sign, score and buttons sit on the right. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.25"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="8dp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back_to_learn"
+                android:src="@drawable/ic_back"
+                android:tint="@color/white" />
+
+            <TextView android:id="@+id/tv_room_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="4dp" android:ellipsize="end" android:maxLines="1" android:text="@string/ai_practice_room" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
+            <TextView android:id="@+id/tv_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:max="100"
+            app:indicatorColor="@color/sun_yellow"
+            app:trackColor="@color/dark_surface"
+            app:trackCornerRadius="3dp"
+            app:trackThickness="6dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/dark_bg"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/dark_stroke"
+            app:strokeWidth="1dp">
+
+            <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+                <!-- TextureView mode ("compatible") so the live preview is clipped to the card's corners. -->
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:implementationMode="compatible"
+                    app:scaleType="fillCenter" />
+
+                <com.senyas.cv.HandOverlayView
+                    android:id="@+id/hand"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/hand_overlay_desc" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_pill" android:backgroundTint="@color/dark_surface" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="@string/front_camera_preview" android:textColor="@color/white" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                    <TextView android:id="@+id/tv_hand" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:accessibilityLiveRegion="polite" android:background="@drawable/bg_pill" android:backgroundTint="@color/dark_surface" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="@string/hand_not_detected" android:textColor="@color/text_on_dark" android:textSize="13sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_guide"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:accessibilityLiveRegion="polite"
+                    android:gravity="center"
+                    android:background="@drawable/bg_pill"
+                    android:backgroundTint="@color/sun_yellow"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="12dp"
+                    android:textColor="@color/navy"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/tv_scenario" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:ellipsize="end" android:maxLines="2" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_watch"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:minHeight="52dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/watch_sign"
+                android:textColor="@color/white"
+                app:icon="@drawable/ic_play"
+                app:iconTint="@color/white"
+                app:strokeColor="@color/text_on_dark" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:requiresFadingEdge="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView android:id="@+id/tv_word" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" android:textSize="30sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tv_translation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_on_dark" android:textSize="15sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_tile"
+                    android:backgroundTint="@color/dark_surface"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <TextView android:id="@+id/tv_score_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/white" android:textSize="18sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/tv_pct" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/sun_yellow" android:textSize="16sp" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.benten.senyas.ScoreBarView
+                        android:id="@+id/score_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="14dp"
+                        android:layout_marginTop="10dp"
+                        android:contentDescription="@string/match_score_pass_mark_is" />
+
+                    <TextView android:id="@+id/tv_score_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/reach_85_to_mark_this" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Always on screen, however long the sign and the score note are. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_skip"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="12dp"
+                android:layout_weight="1"
+                android:paddingHorizontal="12dp"
+                android:text="@string/skip_sign"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:strokeColor="@color/text_on_dark" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_try"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:paddingHorizontal="12dp"
+                android:text="@string/try_again"
+                android:textColor="@color/navy"
+                android:textStyle="bold"
+                app:backgroundTint="@color/sun_yellow"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

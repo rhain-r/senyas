@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: the tutor's video on the left, the whiteboard or chat and the call buttons on the right. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="16dp">
+
+        <ImageButton android:id="@+id/btn_back" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/leave_classroom" android:src="@drawable/ic_back" android:tint="@color/white" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:text="@string/live_classroom" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tv_session" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:ellipsize="end" android:gravity="end" android:maxLines="1" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_tile"
+                android:backgroundTint="@color/dark_surface"
+                android:contentDescription="@string/tutor_video_signing_view">
+
+                <!-- Centred in the space left of the self view, so the two never overlap. -->
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:layout_marginEnd="108dp" android:text="@string/tutor_video_signing_view_2" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="12dp" android:background="@drawable/bg_pill" android:backgroundTint="@color/dark_bg" android:paddingHorizontal="10dp" android:paddingVertical="6dp" android:text="@string/high_frame_rate_60_fps" android:textColor="@color/white" android:textSize="12sp" android:textStyle="bold" />
+
+                <FrameLayout
+                    android:layout_width="96dp"
+                    android:layout_height="128dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="12dp"
+                    android:background="@drawable/bg_tile"
+                    android:backgroundTint="@color/dark_stroke"
+                    android:contentDescription="@string/your_camera_view">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="@string/you" android:textColor="@color/white" android:textSize="14sp" android:textStyle="bold" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:importantForAccessibility="no" android:src="@drawable/ic_check" app:tint="@color/text_on_dark" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:text="@string/visual_connection_status_connected" android:textColor="@color/text_on_dark" android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/board_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_tile"
+                    android:backgroundTint="@color/white"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/shared_whiteboard" android:textColor="@color/ink_secondary" android:textSize="13sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/btn_clear" android:layout_width="wrap_content" android:layout_height="48dp" android:background="?attr/selectableItemBackground" android:gravity="center" android:paddingHorizontal="8dp" android:text="@string/clear" android:textColor="@color/senyas_blue" android:textSize="14sp" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.benten.senyas.WhiteboardView android:id="@+id/whiteboard" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/chat_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_tile"
+                    android:backgroundTint="@color/white"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:visibility="gone">
+
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/text_chat" android:textColor="@color/ink_secondary" android:textSize="13sp" android:textStyle="bold" />
+
+                    <ScrollView android:id="@+id/chat_scroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+                        <LinearLayout android:id="@+id/chat_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                    </ScrollView>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                        <EditText android:id="@+id/et_chat" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:hint="@string/type_a_message" android:textColorHint="@color/ink_secondary" android:imeOptions="actionSend" android:inputType="text" android:maxLines="1" android:textColor="@color/navy" android:textSize="15sp" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btn_send" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginStart="8dp" android:text="@string/send" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:maxLines="2" android:ellipsize="end" android:text="@string/text_chat_available_for_connection" android:textColor="@color/text_on_dark" android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_chat" android:layout_width="0dp" android:layout_height="56dp" android:layout_marginEnd="8dp" android:layout_weight="1" android:text="@string/chat" android:textColor="@color/navy" android:textStyle="bold" app:backgroundTint="@color/white" app:cornerRadius="16dp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_board" android:layout_width="0dp" android:layout_height="56dp" android:layout_marginEnd="8dp" android:layout_weight="1" android:text="@string/board" android:textColor="@color/navy" android:textStyle="bold" app:backgroundTint="@color/white" app:cornerRadius="16dp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_leave" android:layout_width="0dp" android:layout_height="56dp" android:layout_weight="1" android:text="@string/leave" android:textColor="@color/white" android:textStyle="bold" app:backgroundTint="@color/danger" app:cornerRadius="16dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

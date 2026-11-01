@@ -1,0 +1,5 @@
+# Steps 1 and 3-8: references, pass thresholds, videos, parity fixtures, evaluation.
+# Tested with Python 3.14 and numpy 2.5.4 (the versions that produced the app's files).
+numpy>=1.26
+# Step 5 also needs the ffmpeg program (with libx264) on the PATH; it is not a Python package.
+# Step 2 (landmark extraction) has its own environment: see requirements-extract.txt.

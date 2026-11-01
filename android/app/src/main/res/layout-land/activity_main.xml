@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: the tabs move to a rail at the side, so screens keep the whole height of the phone. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:orientation="horizontal">
+
+    <!-- The root already pads for the system bars and the camera cutout. 96dp fits "Mga Booking". -->
+    <com.google.android.material.navigationrail.NavigationRailView
+        android:id="@+id/bottom_nav"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:minWidth="96dp"
+        android:background="?attr/colorSurfaceContainer"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:menuGravity="center"
+        app:paddingBottomSystemWindowInsets="false"
+        app:paddingStartSystemWindowInsets="false"
+        app:paddingTopSystemWindowInsets="false" />
+
+    <FrameLayout
+        android:id="@+id/nav_host"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+</LinearLayout>

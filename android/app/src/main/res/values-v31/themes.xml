@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Senyas.Splash" parent="Theme.Senyas">
+        <item name="android:windowBackground">@color/senyas_icon_bg</item>
+        <item name="android:statusBarColor">@color/senyas_icon_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowSplashScreenBackground">@color/senyas_icon_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_senyas_fg</item>
+    </style>
+</resources>

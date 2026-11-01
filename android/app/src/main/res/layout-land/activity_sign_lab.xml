@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign Lab in landscape: the camera on the left at full height, the controls in a scrolling column on the right. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:scaleType="fillCenter" />
+
+            <com.senyas.cv.HandOverlayView
+                android:id="@+id/overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/hand_overlay_desc" />
+
+            <LinearLayout
+                android:id="@+id/top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_lab_scrim"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="28dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageButton android:id="@+id/btn_back" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/back" android:src="@drawable/ic_back" app:tint="@color/white" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:accessibilityHeading="true" android:text="@string/sign_lab_title" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/model_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_pill"
+                    android:backgroundTint="@color/dark_surface"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="12dp"
+                    android:text="Model: loading…"
+                    android:textColor="@color/white"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_tile"
+                android:backgroundTint="@color/dark_surface"
+                android:paddingHorizontal="28dp"
+                android:paddingVertical="12dp"
+                android:textColor="@color/sun_yellow"
+                android:textSize="56sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <ScrollView
+            android:layout_width="360dp"
+            android:layout_height="match_parent"
+            android:background="@color/dark_surface">
+
+            <LinearLayout
+                android:id="@+id/panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/mode_recognize" style="@style/Widget.Senyas.Button.Lab" android:paddingHorizontal="8dp" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:layout_weight="1" android:text="Recognize" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/mode_practice" style="@style/Widget.Senyas.Button.Lab" android:paddingHorizontal="8dp" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:layout_weight="1" android:text="Practice" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/mode_record" style="@style/Widget.Senyas.Button.Lab" android:paddingHorizontal="8dp" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Record" />
+                </LinearLayout>
+
+                <!-- Recognize: which sign is this? -->
+                <LinearLayout
+                    android:id="@+id/recognize_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical">
+
+                    <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityLiveRegion="polite" android:text="Show your hands to the camera." android:textColor="@color/text_on_dark" android:textSize="13sp" />
+                    <TextView android:id="@+id/sign" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:accessibilityLiveRegion="polite" android:text="—" android:textColor="@color/white" android:textSize="34sp" android:textStyle="bold" />
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/confidence"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:max="100"
+                        app:indicatorColor="@color/sun_yellow"
+                        app:trackColor="@color/dark_stroke"
+                        app:trackCornerRadius="4dp"
+                        app:trackStopIndicatorSize="0dp"
+                        app:trackThickness="8dp" />
+
+                    <TextView android:id="@+id/top3" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:lineSpacingExtra="2dp" android:minLines="3" android:textColor="@color/text_on_dark" android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Practice: score + correction for one chosen sign. -->
+                <LinearLayout
+                    android:id="@+id/practice_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Sign to practise"
+                        app:boxBackgroundColor="@color/dark_surface">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView android:id="@+id/target" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="none" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:baselineAligned="true" android:orientation="horizontal">
+                        <TextView android:id="@+id/practice_score" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="—" android:textColor="@color/white" android:textSize="34sp" android:textStyle="bold" />
+                        <TextView android:id="@+id/practice_verdict" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:accessibilityLiveRegion="polite" android:textColor="@color/white" android:textSize="16sp" android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/practice_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:max="100"
+                        app:indicatorColor="@color/sun_yellow"
+                        app:trackColor="@color/dark_stroke"
+                        app:trackCornerRadius="4dp"
+                        app:trackStopIndicatorSize="0dp"
+                        app:trackThickness="8dp" />
+
+                    <TextView android:id="@+id/guidance" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:accessibilityLiveRegion="polite" android:text="Choose a sign to practise." android:textColor="@color/white" android:textSize="15sp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Visual guidance, not a translation." android:textColor="@color/text_on_dark" android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Record: reference takes for the Practice Room, and training data for ml/train.py. -->
+                <LinearLayout
+                    android:id="@+id/record_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Sign name, e.g. salamat"
+                        app:boxBackgroundColor="@color/dark_surface">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/record_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:completionThreshold="1"
+                            android:imeOptions="actionDone"
+                            android:inputType="text"
+                            android:minHeight="56dp"
+                            android:padding="16dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton android:id="@+id/record" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="10dp" android:text="Record one take (2.5 s)" android:textColor="@color/navy" android:textSize="16sp" android:textStyle="bold" app:backgroundTint="@color/sun_yellow" app:cornerRadius="16dp" />
+                    <TextView android:id="@+id/record_counts" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="@color/white" android:textSize="13sp" />
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton android:id="@+id/undo" style="@style/Widget.Material3.Button.TextButton" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:minHeight="48dp" android:text="Delete last take" android:textColor="@color/white" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/export" style="@style/Widget.Material3.Button.TextButton" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:minHeight="48dp" android:text="Export recordings" android:textColor="@color/sun_yellow" />
+                    </LinearLayout>
+
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Record 5 or more takes per sign, ideally from different signers. The Practice Room scores each sign against its takes; exported files go straight into ml/train.py." android:textColor="@color/text_on_dark" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/permission_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dark_bg"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="@string/camera_access_is_off" android:textColor="@color/white" android:textSize="28sp" android:textStyle="bold" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="Sign recognition reads your hands from the front camera. Video never leaves your phone." android:textColor="@color/text_on_dark" android:textSize="15sp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/allow_camera" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="24dp" android:text="Allow camera" android:textColor="@color/navy" android:textSize="16sp" android:textStyle="bold" app:backgroundTint="@color/white" app:cornerRadius="16dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/open_settings" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/open_camera_settings" android:textColor="@color/white" />
+    </LinearLayout>
+</FrameLayout>

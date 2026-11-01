@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The camera's signer check (com.senyas.cv.HandGate): why hands in view are not used. -->
+<resources>
+    <string name="detect_pill_no_face">Hindi kita ang mukha</string>
+    <string name="detect_pill_too_many_hands">Masyadong maraming kamay</string>
+    <string name="detect_pill_too_many_people">Masyadong maraming tao</string>
+    <string name="detect_show_face">Ipakita sa camera ang mukha at mga kamay mo</string>
+    <string name="detect_too_many_hands">Masyadong maraming kamay. Isang signer lang, hanggang dalawang kamay</string>
+    <string name="detect_too_many_people">Isang signer lang muna. Pakiusapan ang iba na umalis sa kuha ng camera</string>
+    <string name="detect_record_crowded">May ibang kamay o tao sa kuha. Isang signer lang bawat recording.</string>
+    <string name="detect_record_no_face">Hindi kita ang mukha mo. Ipakita ang mukha at mga kamay mo at subukan ulit.</string>
+</resources>

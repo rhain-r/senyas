@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="6dp"
+    app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/card_stroke"
+    app:strokeWidth="1dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <TextView android:id="@+id/tv_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="17sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tv_by" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="@color/text_secondary" android:textSize="14sp" />
+        <com.google.android.material.chip.ChipGroup android:id="@+id/tags" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" app:chipSpacingHorizontal="6dp" app:chipSpacingVertical="4dp" />
+        <TextView android:id="@+id/tv_price" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_approve" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:layout_weight="1" android:minHeight="52dp" android:text="@string/btn_approve" android:textStyle="bold" app:cornerRadius="16dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_remove" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:minHeight="52dp" android:text="@string/btn_remove" android:textColor="@color/error" android:textStyle="bold" app:cornerRadius="16dp" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

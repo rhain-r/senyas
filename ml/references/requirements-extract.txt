@@ -1,0 +1,5 @@
+# Step 2 only: MediaPipe hand tracking. Use Python 3.12 (the tested version).
+# Tested with mediapipe 0.10.21, opencv-contrib-python 4.11.0.86 and numpy 1.26.4.
+mediapipe==0.10.21
+opencv-python>=4.11,<5
+numpy>=1.26,<2

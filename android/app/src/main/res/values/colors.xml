@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="senyas_blue">#1E3AB8</color>
+    <color name="blue_container">#DFE5FF</color>
+    <color name="sun_yellow">#FFC22D</color>
+    <color name="navy">#111A33</color>
+    <color name="background">#EFF4F9</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="outline">#8A94B8</color>
+    <color name="text_secondary">#4B5578</color>
+    <color name="success_container">#DDF1E4</color>
+    <color name="success_text">#0F6B35</color>
+    <color name="warning_container">#FFF1C7</color>
+    <color name="error">#B3261E</color>
+    <color name="dark_bg">#0B1020</color>
+    <color name="dark_surface">#1B2140</color>
+    <color name="card_stroke">#D9DFEE</color>
+    <color name="tag_grey">#E6E8EE</color>
+    <color name="warning_text">#6B4E00</color>
+    <color name="skeleton">#DCE3EE</color>
+    <color name="text_on_dark">#C5CCE8</color>
+    <color name="dark_stroke">#2B3158</color>
+    <color name="text_primary">#111A33</color>
+    <color name="accent">#1E3AB8</color>
+    <color name="danger">#B3261E</color>
+    <color name="ink_secondary">#4B5578</color>
+    <color name="paper_blue">#DFE5FF</color>
+    <color name="paper_grey">#E6E8EE</color>
+    <color name="senyas_icon_bg">#1E3AB8</color>
+</resources>

@@ -1,0 +1,19 @@
+<resources>
+    <style name="Theme.Senyas" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/dark_bg</item>
+        <item name="colorPrimaryContainer">@color/blue_container</item>
+        <item name="colorOnPrimaryContainer">@color/text_primary</item>
+        <item name="colorSecondary">@color/sun_yellow</item>
+        <item name="colorOnSecondary">@color/navy</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorError">@color/error</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="textInputStyle">@style/Widget.Senyas.TextField</item>
+    </style>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/view_top_bar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rg_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <RadioButton android:id="@+id/rb_all" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:buttonTint="@color/senyas_blue" android:text="@string/all_categories" android:textColor="@color/text_primary" android:textSize="16sp" />
+                <RadioButton android:id="@+id/rb_k12" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:buttonTint="@color/senyas_blue" android:text="@string/k_12_academic_support" android:textColor="@color/text_primary" android:textSize="16sp" />
+                <RadioButton android:id="@+id/rb_tech" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:buttonTint="@color/senyas_blue" android:text="@string/digital_tech_skills" android:textColor="@color/text_primary" android:textSize="16sp" />
+                <RadioButton android:id="@+id/rb_voc" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:buttonTint="@color/senyas_blue" android:text="@string/vocational_tesda_prep" android:textColor="@color/text_primary" android:textSize="16sp" />
+                <RadioButton android:id="@+id/rb_life" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:buttonTint="@color/senyas_blue" android:text="@string/life_financial_literacy" android:textColor="@color/text_primary" android:textSize="16sp" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/distance_from_you"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggle_distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_d2" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="52dp" android:layout_weight="1" android:text="2 km" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_d5" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="52dp" android:layout_weight="1" android:text="5 km" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btn_d10" style="?attr/materialButtonOutlinedStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:minHeight="52dp" android:layout_weight="1" android:text="10 km" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/use_my_location_or_choose"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_apply"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="16dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="16dp" />
+</LinearLayout>

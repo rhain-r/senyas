@@ -1,0 +1,6 @@
+# Python 3.10-3.12. All free and open source.
+tensorflow>=2.16
+mediapipe>=0.10.14
+numpy
+opencv-python-headless
+ai-edge-litert

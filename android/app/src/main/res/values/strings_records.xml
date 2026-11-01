@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Saved records kept consistent: cancelled bookings, unfinished listings and suspended accounts. -->
+<resources>
+    <!-- New lesson: step 2 refuses a draft without a title or rate -->
+    <string name="toast_draft_incomplete">Check the lesson title and rate, then tap Next again.</string>
+
+    <!-- Login and admin users -->
+    <string name="err_account_suspended">This account is suspended. Ask the Senyas admin to reactivate it.</string>
+    <string name="toast_cannot_suspend_self">You can\'t suspend the account you are signed in with.</string>
+
+    <!-- Tutor notification: a learner cancelled a booking (learner name, lesson title) -->
+    <string name="notif_t8_title">Booking cancelled</string>
+    <string name="notif_t8_body">%1$s cancelled %2$s</string>
+</resources>
