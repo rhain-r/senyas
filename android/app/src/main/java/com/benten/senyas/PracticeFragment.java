@@ -1,6 +1,7 @@
 package com.benten.senyas;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -8,11 +9,14 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Size;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -31,7 +35,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.senyas.cv.FeatureEncoder;
@@ -66,6 +69,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * back to Sign Lab recordings, then to a trained model in assets. Learners never record anything.
  * Long-press the title to preview the "camera unavailable" screen.
  *
+ * After an attempt a result sheet slides up, driven by the real score: the success sheet as soon
+ * as the attempt's best score reaches the pass mark, or the retry sheet (main tip and % match)
+ * when a scored attempt ends below it, i.e. the hands go out of view for a moment. A sign is worth
+ * {@link #XP_PER_SIGN} XP the first time it passes.
+ *
  * Only the hands of one signer are scored (see HandGate): with no face in view, or more than one
  * person or two hands, the pills say so and the score waits.
  *
@@ -77,6 +85,14 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
 
     /** The room's pass mark: the white marker on the score bar and the copy below it. */
     private static final int PASS = SignScorer.PASS;
+    /** XP a sign earns the first time it passes (the chip in the top bar). */
+    private static final int XP_PER_SIGN = 10;
+    /**
+     * Hands out of view this long after a scored attempt end it. The scorer matches a whole sign
+     * a moment after it ends, so its last score lands within this time.
+     */
+    private static final long END_MS = 1200;
+    private static final int SHEET_NONE = 0, SHEET_SUCCESS = 1, SHEET_RETRY = 2, SHEET_CAMERA = 3;
     private static final String STATE_ASKED = "askedForCamera", STATE_ATTEMPT = "attempt";
 
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -87,15 +103,29 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
     private Scenario sc;
     private int idx, shownKey = -1, attemptId, shownBest = -1;
     private boolean matched, askedForCamera, paused;
-    /** The attempt on screen when the phone turned: its sign, best score and match, shown again. */
+    /** This attempt passed the sign for the first time, so it earned the sign's XP. */
+    private boolean xpEarned;
+    /** The result sheet on screen (SHEET_*). */
+    private int sheetKind = SHEET_NONE;
+    /** A hand was in view during this attempt. */
+    private boolean sawHand;
+    /** When the hands left the view (uptime ms), or -1 while they are in view. */
+    private long handsGoneAt = -1;
+    /** The main correction while the hands were in view, for the retry sheet. */
+    @Nullable private String lastTip;
+    /** The attempt on screen when the phone turned or the screen went to the back stack, shown again. */
     @Nullable private Bundle resume;
 
-    private TextView tvProgress, tvScenario, tvWord, tvTranslation, tvGuide, tvHand, tvScoreTitle, tvPct, tvScoreNote;
+    private TextView tvRoomTitle, tvXp, tvScenario, tvWord, tvTranslation, tvGuide, tvHand, tvTracking;
+    private TextView tvScoreTitle, tvPct, tvScoreNote, btnSkip;
+    private TextView sheetTitle, sheetSub, sheetPrimary, sheetSecondary;
+    private ImageView sheetIcon;
+    private View content, sheet;
+    private int contentPadBottom;
     private LinearProgressIndicator progress;
     private PreviewView preview;
     private HandOverlayView overlay;
     private ScoreBarView scoreBar;
-    private MaterialButton btnSkip;
     private HandTracker tracker; // one per view, created on main
     private AtomicBoolean cameraStopped; // set when the view goes, so late frames skip the closed tracker
     private boolean mirrored = true; // front camera: the preview (and the scorer's left/right) is a mirror
@@ -162,15 +192,8 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
     public void onSaveInstanceState(@NonNull Bundle out) {
         super.onSaveInstanceState(out);
         out.putBoolean(STATE_ASKED, askedForCamera);
-        if (getView() == null) {
-            out.putBundle(STATE_ATTEMPT, resume); // in the back stack: keep what is waiting to be shown
-            return;
-        }
-        Bundle attempt = new Bundle();
-        attempt.putInt("sign", shownKey);
-        attempt.putInt("best", shownBest);
-        attempt.putBoolean("matched", matched);
-        out.putBundle(STATE_ATTEMPT, attempt);
+        // In the back stack there is no view: keep what is waiting to be shown.
+        out.putBundle(STATE_ATTEMPT, getView() == null ? resume : attemptState());
     }
 
     @Nullable
@@ -179,22 +202,37 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
         return inflater.inflate(R.layout.fragment_practice, container, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility") // the sheet only stops touches reaching the screen behind it
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
-        tvProgress = v.findViewById(R.id.tv_progress);
+        tvRoomTitle = v.findViewById(R.id.tv_room_title);
+        tvXp = v.findViewById(R.id.tv_xp_reward);
         tvScenario = v.findViewById(R.id.tv_scenario);
         tvWord = v.findViewById(R.id.tv_word);
         tvTranslation = v.findViewById(R.id.tv_translation);
         tvGuide = v.findViewById(R.id.tv_guide);
         tvHand = v.findViewById(R.id.tv_hand);
+        tvTracking = v.findViewById(R.id.tv_tracking);
         tvScoreTitle = v.findViewById(R.id.tv_score_title);
         tvPct = v.findViewById(R.id.tv_pct);
         tvScoreNote = v.findViewById(R.id.tv_score_note);
+        btnSkip = v.findViewById(R.id.btn_skip);
         progress = v.findViewById(R.id.progress);
         preview = v.findViewById(R.id.preview);
         overlay = v.findViewById(R.id.hand);
         scoreBar = v.findViewById(R.id.score_bar);
-        btnSkip = v.findViewById(R.id.btn_skip);
+        content = v.findViewById(R.id.practice_content);
+        contentPadBottom = content.getPaddingBottom();
+        sheet = v.findViewById(R.id.sheet);
+        sheetIcon = v.findViewById(R.id.iv_sheet_icon);
+        sheetTitle = v.findViewById(R.id.tv_sheet_title);
+        sheetSub = v.findViewById(R.id.tv_sheet_sub);
+        sheetPrimary = v.findViewById(R.id.btn_sheet_primary);
+        sheetSecondary = v.findViewById(R.id.btn_sheet_secondary);
+        sheetKind = SHEET_NONE;
+
+        tvXp.setText(getString(R.string.xp_reward, XP_PER_SIGN));
+        tvXp.setContentDescription(getString(R.string.practice_xp_chip_desc, XP_PER_SIGN));
 
         // Keep the dashed guide where the placeholder drew it: below the pills, above the guide pill.
         overlay.setGuideInsets(Ui.dp(requireContext(), 56), Ui.dp(requireContext(), 64));
@@ -202,26 +240,20 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
 
         v.findViewById(R.id.btn_back).setOnClickListener(x ->
                 ((MainActivity) requireActivity()).selectTab(R.id.nav_learn));
-        v.findViewById(R.id.tv_room_title).setOnLongClickListener(x -> {
+        tvRoomTitle.setOnLongClickListener(x -> {
             ((MainActivity) requireActivity()).open(new CameraUnavailableFragment());
             return true;
         });
         // The signed demonstration of the sign on screen; Back returns here.
         v.findViewById(R.id.btn_watch).setOnClickListener(x ->
                 ((MainActivity) requireActivity()).open(SignLessonFragment.newInstance(sc.id, idx)));
-        v.findViewById(R.id.btn_try).setOnClickListener(x -> {
-            if (!hasCamera()) cameraPermission.launch(Manifest.permission.CAMERA);
-            else startAttempt();
-        });
-        btnSkip.setOnClickListener(x -> {
-            if (!matched && Repo.practiceBest[idx] < 0) Repo.practiceBest[idx] = -2;
-            advance();
-        });
+        btnSkip.setOnClickListener(x -> skip());
+        sheetSecondary.setOnClickListener(x -> skip());
+        sheetPrimary.setOnClickListener(x -> onSheetPrimary());
+        sheet.setOnTouchListener((x, e) -> true);
 
         bindSign();
-        if (resume != null && resume.getInt("sign") == shownKey) {
-            resumeAttempt(resume.getInt("best"), resume.getBoolean("matched"));
-        }
+        if (resume != null && resume.getInt("sign") == shownKey) resumeAttempt(resume);
         resume = null;
         if (hasCamera()) {
             startCamera();
@@ -252,7 +284,9 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
 
     @Override
     public void onDestroyView() {
+        resume = attemptState(); // Back from the lesson or the summary shows this attempt again
         main.removeCallbacksAndMessages(null);
+        sheet.animate().cancel();
         displays().unregisterDisplayListener(displayListener);
         HandTracker t = tracker;
         tracker = null;
@@ -288,11 +322,12 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
         shownKey = Repo.practiceScenario * 100 + idx;
         String[] sign = sc.signs[idx];
         int total = sc.signs.length;
+        tvRoomTitle.setText(getString(R.string.sign_title, sign[0]));
         tvScenario.setText(sc.label(requireContext()));
         tvWord.setText(sign[0]);
         tvTranslation.setText(sign[1]);
-        tvProgress.setText(getString(R.string.sign_x_of_y, idx + 1, total));
         progress.setProgress((idx + 1) * 100 / total);
+        progress.setContentDescription(getString(R.string.sign_x_of_y, idx + 1, total));
         loadReferences(SignSample.normalizeLabel(sign[0]));
         startAttempt();
     }
@@ -300,7 +335,12 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
     private void startAttempt() {
         int id = ++attemptId;
         matched = false;
+        xpEarned = false;
         shownBest = -1;
+        sawHand = false;
+        handsGoneAt = -1;
+        lastTip = null;
+        hideSheet();
         btnSkip.setText(R.string.skip_sign);
         tvGuide.setText(R.string.score_waiting);
         showScore(-1, true, null);
@@ -311,21 +351,57 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
             scorer.reset();
             if (recognizer != null) recognizer.reset();
         });
+        if (askedForCamera && !hasCamera()) showCameraOff(); // a new sign while access is still off
     }
 
     /** Shows the attempt again after the phone turned; the camera restarts, the best score stays. */
-    private void resumeAttempt(int best, boolean wasMatched) {
-        if (wasMatched) {
-            matched = true;
-            btnSkip.setText(R.string.next_sign);
+    private void resumeAttempt(Bundle a) {
+        int best = a.getInt("best", -1);
+        lastTip = a.getString("tip");
+        if (best >= 0) {
+            shownBest = best;
+            showScore(best, true, null);
+            int id = attemptId;
+            runOnCv(() -> {
+                if (cvAttemptId == id && best > attemptBest) attemptBest = best;
+            });
         }
-        if (best < 0) return;
-        shownBest = best;
-        showScore(best, true, null);
-        int id = attemptId;
-        runOnCv(() -> {
-            if (cvAttemptId == id && best > attemptBest) attemptBest = best;
-        });
+        if (a.getBoolean("matched")) {
+            matched = true;
+            xpEarned = a.getBoolean("xp");
+            btnSkip.setText(R.string.next_sign);
+            showSuccess(false);
+        } else if (a.getBoolean("retry") && best >= 0) {
+            sawHand = true;
+            showRetry(false);
+        }
+    }
+
+    /** What resumeAttempt needs to show this attempt again. */
+    private Bundle attemptState() {
+        Bundle a = new Bundle();
+        a.putInt("sign", shownKey);
+        a.putInt("best", shownBest);
+        a.putBoolean("matched", matched);
+        a.putBoolean("xp", xpEarned);
+        a.putBoolean("retry", sheetKind == SHEET_RETRY);
+        a.putString("tip", lastTip);
+        return a;
+    }
+
+    private void onSheetPrimary() {
+        if (sheetKind == SHEET_SUCCESS) {
+            advance();
+        } else if (sheetKind == SHEET_CAMERA || !hasCamera()) {
+            cameraPermission.launch(Manifest.permission.CAMERA);
+        } else {
+            startAttempt(); // "Try again": a fresh attempt, scored from zero
+        }
+    }
+
+    private void skip() {
+        if (!matched && Repo.practiceBest[idx] < 0) Repo.practiceBest[idx] = -2;
+        advance();
     }
 
     private void advance() {
@@ -353,6 +429,8 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
             tvGuide.setText(getString(R.string.tracking_failed, String.valueOf(e.getMessage())));
             return;
         }
+        if (sheetKind == SHEET_CAMERA) hideSheet();
+        setHandPill(false, R.string.hand_not_detected);
         Context context = requireContext();
         LifecycleOwner owner = getViewLifecycleOwner();
         HandTracker analyzer = tracker;
@@ -387,8 +465,10 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
                 });
                 provider.unbindAll();
                 provider.bindToLifecycle(owner, selector, p, analysis);
+                tvTracking.setVisibility(View.VISIBLE);
                 tvGuide.setText(R.string.detect_show_face);
             } catch (Exception e) {
+                tvTracking.setVisibility(View.GONE);
                 tvGuide.setText(getString(R.string.camera_failed, String.valueOf(e.getMessage())));
             }
         }, ContextCompat.getMainExecutor(context));
@@ -396,11 +476,14 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
 
     private void showCameraOff() {
         setHandPill(false, R.string.camera_off);
+        tvTracking.setVisibility(View.GONE);
         tvGuide.setText(R.string.camera_access_is_off);
         scoreBar.setScore(0);
         tvPct.setText(R.string.no_score);
         tvScoreTitle.setText(R.string.camera_access_is_off);
         tvScoreNote.setText(R.string.enable_camera_access_in_your);
+        showSheet(SHEET_CAMERA, getString(R.string.camera_access_is_off),
+                getString(R.string.enable_camera_access_in_your), true);
     }
 
     @Override
@@ -508,16 +591,49 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
 
     private void show(Feedback fb, int best, boolean hasReference, HandFrame.Status status, int faces) {
         overlay.setFeedback(fb);
-        if (best >= PASS && !matched) {
+        boolean passedNow = best >= PASS && !matched;
+        if (passedNow) {
             matched = true;
+            xpEarned = Repo.practiceBest[idx] < PASS; // a sign earns its XP the first time it passes
             btnSkip.setText(R.string.next_sign);
         }
         if (best >= 0 && best > Repo.practiceBest[idx]) Repo.practiceBest[idx] = best;
         shownBest = best;
         showScore(best, hasReference, fb);
+        if (passedNow) showSuccess(true);
+        else if (!matched) followAttempt(fb, best, status);
         if (showRefused(status)) return;
         setHandPill(fb.handVisible, fb.handVisible ? R.string.hand_detected : R.string.hand_not_detected);
         tvGuide.setText(matched ? getString(R.string.guide_great) : guideText(fb, faces));
+    }
+
+    /**
+     * Ends a scored attempt below the pass mark when the hands stay out of view for END_MS: the
+     * retry sheet then shows the attempt's best score and the last correction made while the
+     * hands were in view. Signing again without "Try again" keeps the attempt going: a better
+     * score updates the sheet, a pass replaces it with the success sheet.
+     */
+    private void followAttempt(Feedback fb, int best, HandFrame.Status status) {
+        if (fb.handVisible) {
+            sawHand = true;
+            handsGoneAt = -1;
+            // Not edge tips: lowering the hands to finish puts them at the edge of the picture.
+            Tip t = mainTip(fb, false);
+            if (t != null && t.kind != Tip.Kind.GOOD) lastTip = tipText(t);
+        } else if (status != HandFrame.Status.NO_HANDS) {
+            handsGoneAt = -1; // hands in view but refused (no face): not the end of the sign
+        } else if (sawHand && best >= 0 && sheetKind == SHEET_NONE) {
+            long now = SystemClock.uptimeMillis();
+            if (handsGoneAt < 0) handsGoneAt = now;
+            else if (now - handsGoneAt >= END_MS) showRetry(true);
+        }
+        if (sheetKind == SHEET_RETRY) {
+            String title = retryTitle(), sub = retrySub();
+            if (!sub.contentEquals(sheetSub.getText()) || !title.contentEquals(sheetTitle.getText())) {
+                sheetTitle.setText(title);
+                sheetSub.setText(sub);
+            }
+        }
     }
 
     /** More than one signer or two hands in view: say so, and leave the score as it was. */
@@ -573,17 +689,102 @@ public class PracticeFragment extends Fragment implements DarkScreen, HandTracke
     private void setHandPill(boolean found, int text) {
         Context c = requireContext();
         tvHand.setText(text);
-        tvHand.setBackgroundTintList(ColorStateList.valueOf(c.getColor(found ? R.color.success_container : R.color.dark_surface)));
+        tvHand.setBackgroundTintList(ColorStateList.valueOf(c.getColor(found ? R.color.success_container : R.color.dark_bg)));
         tvHand.setTextColor(c.getColor(found ? R.color.success_text : R.color.text_on_dark));
     }
+
+    // ------------------------------------------------------------------ result sheet (main)
+
+    /** "Galing! That's Salamat": the match, and the sign's XP the first time it passes. */
+    private void showSuccess(boolean animate) {
+        String pct = getString(R.string.match_pct, Math.max(shownBest, 0));
+        String sub = xpEarned ? getString(R.string.practice_join, pct, getString(R.string.practice_xp_earned, XP_PER_SIGN)) : pct;
+        showSheet(SHEET_SUCCESS, getString(R.string.sheet_great, sc.signs[idx][0]), sub, animate);
+    }
+
+    private void showRetry(boolean animate) {
+        showSheet(SHEET_RETRY, retryTitle(), retrySub(), animate);
+    }
+
+    private String retryTitle() {
+        return getString(shownBest >= 60 ? R.string.sheet_almost : R.string.sheet_keep);
+    }
+
+    /** "↑ Move your hand up · 78% match". */
+    private String retrySub() {
+        String tip = lastTip != null ? lastTip : getString(R.string.tip_almost);
+        return getString(R.string.practice_join, tip, getString(R.string.match_pct, Math.max(shownBest, 0)));
+    }
+
+    private void showSheet(int kind, String title, String sub, boolean animate) {
+        Context c = requireContext();
+        boolean success = kind == SHEET_SUCCESS;
+        int text = c.getColor(success ? R.color.success_text : R.color.warning_text);
+        sheet.setBackgroundResource(success ? R.drawable.bg_sheet_success : R.drawable.bg_sheet_retry);
+        sheetTitle.setTextColor(text);
+        sheetSub.setTextColor(text);
+        sheetTitle.setText(title);
+        sheetSub.setText(sub);
+        sheetIcon.setImageResource(success ? R.drawable.ic_check
+                : kind == SHEET_CAMERA ? R.drawable.ic_practice : R.drawable.ic_hand);
+        sheetIcon.setColorFilter(c.getColor(success ? R.color.success_green : R.color.yellow_edge));
+        if (success) {
+            sheetPrimary.setBackgroundResource(R.drawable.btn_success);
+            sheetPrimary.setTextColor(c.getColor(R.color.white));
+            sheetPrimary.setText(R.string.btn_continue);
+            sheetSecondary.setVisibility(View.GONE);
+        } else {
+            sheetPrimary.setBackgroundResource(R.drawable.btn_yellow);
+            sheetPrimary.setTextColor(c.getColor(R.color.navy));
+            sheetPrimary.setText(kind == SHEET_CAMERA ? R.string.practice_allow_camera : R.string.try_again);
+            sheetSecondary.setVisibility(View.VISIBLE);
+            sheetSecondary.setTextColor(text);
+        }
+        boolean slideIn = animate && sheetKind == SHEET_NONE;
+        sheetKind = kind;
+        btnSkip.setVisibility(View.INVISIBLE);
+        sheet.animate().cancel();
+        // Start below the screen so the first frame does not flash the sheet in place.
+        sheet.setTranslationY(slideIn ? getResources().getDisplayMetrics().heightPixels : 0f);
+        sheet.setVisibility(View.VISIBLE);
+        sheet.post(() -> {
+            if (getView() == null || sheetKind == SHEET_NONE) return;
+            content.setPadding(content.getPaddingLeft(), content.getPaddingTop(), content.getPaddingRight(),
+                    contentPadBottom + sheet.getHeight());
+            if (slideIn) {
+                sheet.setTranslationY(sheet.getHeight());
+                sheet.animate().translationY(0f).setDuration(260)
+                        .setInterpolator(new DecelerateInterpolator()).start();
+            }
+        });
+    }
+
+    private void hideSheet() {
+        sheet.animate().cancel();
+        sheet.setTranslationY(0f);
+        sheet.setVisibility(View.GONE);
+        sheetKind = SHEET_NONE;
+        btnSkip.setVisibility(View.VISIBLE);
+        content.setPadding(content.getPaddingLeft(), content.getPaddingTop(), content.getPaddingRight(), contentPadBottom);
+    }
+
+    // ------------------------------------------------------------------ tips (main)
 
     /** The scorer's most useful correction, in the app's language. */
     private String guideText(Feedback fb, int faces) {
         if (!fb.handVisible) return getString(faces == 0 ? R.string.detect_show_face : R.string.guide_show_hand);
+        Tip t = mainTip(fb, true);
+        return t != null ? tipText(t) : getString(R.string.score_waiting);
+    }
+
+    /** The first tip that is a correction (not "these parts are right"); edge tips only if asked. */
+    @Nullable
+    private static Tip mainTip(Feedback fb, boolean edges) {
         for (Tip t : fb.tips) {
-            if (t.kind != Tip.Kind.PARTS_RIGHT) return tipText(t);
+            if (t.kind == Tip.Kind.PARTS_RIGHT || (!edges && t.kind == Tip.Kind.EDGE)) continue;
+            return t;
         }
-        return getString(R.string.score_waiting);
+        return null;
     }
 
     /** "hand shape and movement" when the scorer says those parts are already right. */

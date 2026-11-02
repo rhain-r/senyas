@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Learner tabs. Bookings is not a tab any more: it opens from Profile (and after booking). -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/nav_learn" android:icon="@drawable/ic_learn" android:title="@string/nav_learn" />
+    <item android:id="@+id/nav_learn" android:icon="@drawable/ic_home" android:title="@string/nav_home" />
+    <item android:id="@+id/nav_path" android:icon="@drawable/ic_path" android:title="@string/path_title" />
     <item android:id="@+id/nav_practice" android:icon="@drawable/ic_practice" android:title="@string/nav_practice" />
     <item android:id="@+id/nav_tutors" android:icon="@drawable/ic_tutors" android:title="@string/nav_tutors" />
-    <item android:id="@+id/nav_bookings" android:icon="@drawable/ic_bookings" android:title="@string/nav_bookings" />
     <item android:id="@+id/nav_profile" android:icon="@drawable/ic_profile" android:title="@string/nav_profile" />
 </menu>

@@ -1,186 +1,362 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Practice Room: the sign and its XP at the top, the live camera card, the score, and a result
+     sheet that slides up from the bottom when an attempt passes or ends below the pass mark. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_bg"
-    android:fillViewport="true">
+    android:background="@color/dark_bg">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
+        <!-- Its bottom padding grows while the sheet is up, so everything can scroll above the sheet. -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="4dp"
-            android:paddingEnd="16dp">
-
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/back_to_learn"
-                android:src="@drawable/ic_back"
-                android:tint="@color/white" />
-
-            <TextView android:id="@+id/tv_room_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="4dp" android:text="@string/ai_practice_room" android:textColor="@color/white" android:textSize="20sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tv_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_on_dark" android:textSize="14sp" />
-        </LinearLayout>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/progress"
+            android:id="@+id/practice_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:max="100"
-            app:indicatorColor="@color/sun_yellow"
-            app:trackColor="@color/dark_surface"
-            app:trackCornerRadius="3dp"
-            app:trackThickness="6dp" />
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="20dp">
 
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
-                <TextView android:id="@+id/tv_scenario" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_on_dark" android:textSize="14sp" />
-                <TextView android:id="@+id/tv_word" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/white" android:textSize="34sp" android:textStyle="bold" />
-                <TextView android:id="@+id/tv_translation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_on_dark" android:textSize="15sp" />
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/back_to_learn"
+                    android:src="@drawable/ic_close"
+                    android:tint="@color/white" />
+
+                <!-- "Sign: Salamat". Long-press previews the "camera unavailable" screen. -->
+                <TextView
+                    android:id="@+id/tv_room_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_xp_reward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_chip_stat_yellow"
+                    android:paddingStart="14dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="8dp"
+                    android:textColor="@color/navy"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_watch"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:minHeight="52dp"
-                android:text="@string/watch_sign"
-                android:textColor="@color/white"
-                app:icon="@drawable/ic_play"
-                app:iconTint="@color/white"
-                app:strokeColor="@color/text_on_dark" />
-        </LinearLayout>
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:max="100"
+                app:indicatorColor="@color/sun_yellow"
+                app:trackColor="@color/dark_surface"
+                app:trackCornerRadius="8dp"
+                app:trackThickness="10dp" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="340dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/dark_bg"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/dark_stroke"
-            app:strokeWidth="1dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="20dp">
 
-            <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <!-- TextureView mode ("compatible") so the live preview is clipped to the card's corners. -->
-                <androidx.camera.view.PreviewView
-                    android:id="@+id/preview"
+                    <TextView
+                        android:id="@+id/tv_scenario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_on_dark"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tv_word"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="30sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_translation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_on_dark"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btn_watch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_pill"
+                    android:backgroundTint="@color/dark_surface"
+                    android:clickable="true"
+                    android:drawableStart="@drawable/ic_play"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="@color/white"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/watch_sign"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- A card (not a plain background) so the live preview is clipped to the rounded corners;
+                 the white stroke is drawn over the preview. -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="330dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/dark_surface"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/white"
+                app:strokeWidth="3dp">
+
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:implementationMode="compatible"
-                    app:scaleType="fillCenter" />
+                    android:layout_height="match_parent">
 
-                <com.senyas.cv.HandOverlayView
-                    android:id="@+id/hand"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/hand_overlay_desc" />
+                    <!-- TextureView mode ("compatible") so the live preview is clipped to the card's corners. -->
+                    <androidx.camera.view.PreviewView
+                        android:id="@+id/preview"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:implementationMode="compatible"
+                        app:scaleType="fillCenter" />
+
+                    <com.senyas.cv.HandOverlayView
+                        android:id="@+id/hand"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/hand_overlay_desc" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="14dp">
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <!-- Shown once the camera runs. -->
+                            <TextView
+                                android:id="@+id/tv_tracking"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/bg_tag_label"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="6dp"
+                                android:text="@string/tracking_points"
+                                android:textColor="@color/navy"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tv_hand"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:accessibilityLiveRegion="polite"
+                            android:background="@drawable/bg_pill"
+                            android:backgroundTint="@color/dark_bg"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:text="@string/hand_not_detected"
+                            android:textColor="@color/text_on_dark"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_guide"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginHorizontal="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:accessibilityLiveRegion="polite"
+                        android:background="@drawable/bg_pill"
+                        android:backgroundTint="@color/sun_yellow"
+                        android:gravity="center"
+                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="10dp"
+                        android:textColor="@color/navy"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_tile"
+                android:backgroundTint="@color/dark_surface"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="12dp">
+                    android:orientation="horizontal">
 
-                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@drawable/bg_pill" android:backgroundTint="@color/dark_surface" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="@string/front_camera_preview" android:textColor="@color/white" android:textSize="13sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
-                    <TextView android:id="@+id/tv_hand" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:accessibilityLiveRegion="polite" android:background="@drawable/bg_pill" android:backgroundTint="@color/dark_surface" android:paddingHorizontal="12dp" android:paddingVertical="8dp" android:text="@string/hand_not_detected" android:textColor="@color/text_on_dark" android:textSize="13sp" android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv_score_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/white"
+                        android:textSize="17sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_pct"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/sun_yellow"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
+                <com.benten.senyas.ScoreBarView
+                    android:id="@+id/score_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="14dp"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="@string/match_score_pass_mark_is" />
+
                 <TextView
-                    android:id="@+id/tv_guide"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tv_score_note"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginHorizontal="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:accessibilityLiveRegion="polite"
-                    android:gravity="center"
-                    android:background="@drawable/bg_pill"
-                    android:backgroundTint="@color/sun_yellow"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="12dp"
-                    android:textColor="@color/navy"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </FrameLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_tile"
-            android:backgroundTint="@color/dark_surface"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@+id/tv_score_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textColor="@color/white" android:textSize="18sp" android:textStyle="bold" />
-                <TextView android:id="@+id/tv_pct" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/sun_yellow" android:textSize="16sp" android:textStyle="bold" />
+                    android:layout_marginTop="10dp"
+                    android:text="@string/reach_85_to_mark_this"
+                    android:textColor="@color/text_on_dark"
+                    android:textSize="13sp" />
             </LinearLayout>
 
-            <com.benten.senyas.ScoreBarView
-                android:id="@+id/score_bar"
-                android:layout_width="match_parent"
-                android:layout_height="14dp"
-                android:layout_marginTop="12dp"
-                android:contentDescription="@string/match_score_pass_mark_is" />
-
-            <TextView android:id="@+id/tv_score_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/reach_85_to_mark_this" android:textColor="@color/text_on_dark" android:textSize="14sp" />
+            <!-- "Skip sign", or "Next sign" once the sign is matched. Hidden while a sheet is up. -->
+            <TextView
+                android:id="@+id/btn_skip"
+                style="@style/Widget.Senyas.LinkBtn"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/skip_sign"
+                android:textColor="@color/text_on_dark" />
         </LinearLayout>
+    </ScrollView>
+
+    <!-- Result sheet: success (Continue) or retry (Try again / Skip sign); also "camera access is off". -->
+    <LinearLayout
+        android:id="@+id/sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_sheet_success"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_skip"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
+            <FrameLayout
+                android:layout_width="56dp"
                 android:layout_height="56dp"
-                android:layout_marginEnd="12dp"
-                android:layout_weight="1"
-                android:text="@string/skip_sign"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:strokeColor="@color/text_on_dark" />
+                android:background="@drawable/bg_circle_white">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_try"
+                <ImageView
+                    android:id="@+id/iv_sheet_icon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_check" />
+            </FrameLayout>
+
+            <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:layout_weight="1"
-                android:text="@string/try_again"
-                android:textColor="@color/navy"
-                android:textStyle="bold"
-                app:backgroundTint="@color/sun_yellow"
-                app:cornerRadius="16dp" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_sheet_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:accessibilityLiveRegion="polite"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_sheet_sub"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textSize="14sp" />
+            </LinearLayout>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/btn_sheet_primary"
+            style="@style/Widget.Senyas.Btn3D.Success"
+            android:layout_marginTop="18dp"
+            android:text="@string/btn_continue" />
+
+        <TextView
+            android:id="@+id/btn_sheet_secondary"
+            style="@style/Widget.Senyas.LinkBtn"
+            android:layout_marginTop="4dp"
+            android:text="@string/skip_sign"
+            android:visibility="gone" />
     </LinearLayout>
-</ScrollView>
+</FrameLayout>

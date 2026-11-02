@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Practice Room and sign lesson strings added when the redesign was merged with the camera AI. -->
+<resources>
+    <string name="practice_xp_chip_desc">Pass this sign to earn %1$d XP</string>
+    <string name="practice_xp_earned" translatable="false">+%1$d XP</string>
+    <!-- Two parts of one line, e.g. "Move your hand up · 78% match". -->
+    <string name="practice_join" translatable="false">%1$s · %2$s</string>
+    <string name="practice_allow_camera">Allow camera</string>
+</resources>

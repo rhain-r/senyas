@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Redesigned Home and Path: extra strings the merge needed on top of strings_ui.xml. -->
+<resources>
+    <string name="home_start">Simulan: %1$s</string>
+    <string name="home_review">Balikan: %1$s</string>
+    <plurals name="home_streak_days">
+        <item quantity="one">%d araw</item>
+        <item quantity="other">%d araw</item>
+    </plurals>
+    <string name="home_xp_desc">%1$d XP ang nakuha</string>
+    <string name="home_goal_desc">Layunin ngayong araw: %1$d sa %2$d XP</string>
+    <string name="home_sotd_desc">Sign ng araw: %1$s, %2$s. Bubuksan ang aralin.</string>
+</resources>

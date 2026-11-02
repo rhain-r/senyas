@@ -11,7 +11,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 /** End of a scenario in the Practice Room: the account's best results for its signs. */
-public class PracticeSummaryFragment extends Fragment {
+public class PracticeSummaryFragment extends Fragment implements StatusTint {
+
+    @Override
+    public int statusColor() {
+        return R.color.surface; // the screen's own background, up to the top edge
+    }
 
     @Nullable
     @Override
@@ -30,7 +35,7 @@ public class PracticeSummaryFragment extends Fragment {
             if (s < 0) continue;
             practiced++;
             sum += s;
-            if (s < 85 && s < worstScore) { worstScore = s; worst = i; }
+            if (s < Progress.PASS && s < worstScore) { worstScore = s; worst = i; }
         }
         int avg = practiced == 0 ? 0 : Math.round(sum / (float) practiced);
 

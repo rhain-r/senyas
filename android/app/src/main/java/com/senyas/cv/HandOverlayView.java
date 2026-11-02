@@ -17,8 +17,9 @@ import com.senyas.ml.Landmarks;
 
 /**
  * Draws over the camera preview: the camera guide, each hand's skeleton, and a correction
- * arrow. Finger colours follow the practice feedback (green = matches, red = adjust), and every
- * colour cue also has a written message on screen, so nothing depends on colour alone.
+ * arrow. The skeleton is the app's look: yellow bones with white joints. Finger colours follow
+ * the practice feedback (green = matches, red = adjust, with red joints too), and every colour cue
+ * also has a written message on screen, so nothing depends on colour alone.
  *
  * Maps MediaPipe's image coordinates onto the preview, which fills the view (centre-crop) and is
  * mirrored for the front camera.
@@ -26,7 +27,7 @@ import com.senyas.ml.Landmarks;
 public final class HandOverlayView extends View {
     private static final int GOOD = Color.parseColor("#5BD08F");
     private static final int FIX = Color.parseColor("#FF8A7A");
-    private static final int NEUTRAL = Color.parseColor("#FFC83A");
+    private static final int NEUTRAL = Color.parseColor("#FFC22D"); // the app's sun yellow
 
     private final Paint bone = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint joint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -51,13 +52,13 @@ public final class HandOverlayView extends View {
         super(context, attrs);
         float d = getResources().getDisplayMetrics().density;
         bone.setStyle(Paint.Style.STROKE);
-        bone.setStrokeWidth(4 * d);
+        bone.setStrokeWidth(3.5f * d);
         bone.setStrokeCap(Paint.Cap.ROUND);
         joint.setStyle(Paint.Style.FILL);
         guide.setStyle(Paint.Style.STROKE);
         guide.setStrokeWidth(2 * d);
-        guide.setColor(Color.argb(150, 255, 255, 255));
-        guide.setPathEffect(new DashPathEffect(new float[]{12 * d, 8 * d}, 0));
+        guide.setColor(Color.argb(120, 255, 255, 255));
+        guide.setPathEffect(new DashPathEffect(new float[]{10 * d, 8 * d}, 0));
         arrow.setStyle(Paint.Style.FILL);
         arrow.setColor(FIX);
     }
@@ -120,9 +121,9 @@ public final class HandOverlayView extends View {
                     canvas.drawLine(px(lm, b[0], scale, dx), py(lm, b[0], scale, dy),
                             px(lm, b[1], scale, dx), py(lm, b[1], scale, dy), bone);
                 }
-                float jr = 5 * getResources().getDisplayMetrics().density;
+                float jr = 4.5f * getResources().getDisplayMetrics().density;
                 for (int k = 0; k < 21; k++) {
-                    joint.setColor(colorFor(ok, k));
+                    joint.setColor(jointColorFor(ok, k));
                     canvas.drawCircle(px(lm, k, scale, dx), py(lm, k, scale, dy), jr, joint);
                 }
             }
@@ -170,6 +171,12 @@ public final class HandOverlayView extends View {
         if (ok == null || point == 0) return ok == null ? NEUTRAL : Color.WHITE;
         int finger = (point - 1) / 4;
         return ok[finger] ? GOOD : FIX;
+    }
+
+    /** White joints, except on a finger the advice says to adjust (red, like its bones). */
+    private static int jointColorFor(boolean[] ok, int point) {
+        if (ok == null || point == 0) return Color.WHITE;
+        return ok[(point - 1) / 4] ? Color.WHITE : FIX;
     }
 
     private void drawArrow(Canvas canvas, float w, float h) {

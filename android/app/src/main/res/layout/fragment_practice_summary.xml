@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- End of a scenario: the mascot, the account's results for its signs, and 3D buttons. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/surface"
     android:orientation="vertical">
 
     <include layout="@layout/view_top_bar" />
@@ -10,36 +11,117 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="20dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/practice_complete" android:textColor="@color/text_secondary" android:textSize="12sp" android:textStyle="bold" android:letterSpacing="0.08" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/every_attempt_counts" android:textColor="@color/text_primary" android:textSize="28sp" android:textStyle="bold" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/your_sample_score_is_saved" android:textColor="@color/text_secondary" android:textSize="15sp" />
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="112dp"
+                android:layout_gravity="center_horizontal"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_mascot" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:letterSpacing="0.08"
+                android:text="@string/practice_complete"
+                android:textAllCaps="true"
+                android:textColor="@color/accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:text="@string/every_attempt_counts"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/your_sample_score_is_saved"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:background="@drawable/bg_tile"
-                android:backgroundTint="@color/blue_container"
+                android:background="@drawable/bg_card_tinted"
                 android:gravity="center_horizontal"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:paddingStart="24dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="29dp">
 
-                <TextView android:id="@+id/tv_score" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="44sp" android:textStyle="bold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/signs_practiced" android:textColor="@color/text_secondary" android:textSize="15sp" />
-                <TextView android:id="@+id/tv_avg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textColor="@color/text_primary" android:textSize="14sp" android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/tv_score"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textSize="44sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/signs_practiced"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/tv_avg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="@string/keep_working_on" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tv_work1" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/text_primary" android:textSize="15sp" />
-            <TextView android:id="@+id/tv_work2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:textColor="@color/text_secondary" android:textSize="14sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/keep_working_on"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_work1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/tv_work2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
 
@@ -48,9 +130,20 @@
         android:layout_height="wrap_content"
         android:background="@color/surface"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="20dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
 
-        <com.google.android.material.button.MaterialButton android:id="@+id/btn_again" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/practice_again" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/btn_learn" style="?attr/materialButtonOutlinedStyle" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="8dp" android:text="@string/back_to_learn" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
+        <TextView
+            android:id="@+id/btn_again"
+            style="@style/Widget.Senyas.Btn3D.Primary"
+            android:text="@string/practice_again" />
+
+        <TextView
+            android:id="@+id/btn_learn"
+            style="@style/Widget.Senyas.Btn3D.Secondary"
+            android:layout_marginTop="12dp"
+            android:text="@string/back_to_learn" />
     </LinearLayout>
 </LinearLayout>

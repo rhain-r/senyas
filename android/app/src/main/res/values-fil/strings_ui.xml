@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings of the redesigned UI (from the Senyas UI project). -->
+<resources>
+    <string name="home_greeting">Kumusta, %1$s! Mag-sign tayo!</string>
+    <string name="daily_goal">Pang-araw-araw na layunin</string>
+    <string name="xp_progress">%1$d / %2$d XP</string>
+    <string name="xp_total">%1$d XP</string>
+    <string name="xp_reward">+%1$d</string>
+    <string name="home_continue">Ituloy: %1$s</string>
+    <string name="btn_practice_camera">Magsanay gamit ang camera</string>
+    <string name="sign_of_the_day">Sign ng araw</string>
+    <string name="path_title">Landas ng pag-aaral</string>
+    <string name="path_unit">Unit %1$d</string>
+    <string name="path_start">Simulan</string>
+    <string name="path_locked_toast">Tapusin muna ang mga naunang sign para ma-unlock ito</string>
+    <string name="path_node_done">%1$s, tapos na</string>
+    <string name="path_node_current">%1$s, dito magsimula</string>
+    <string name="path_node_locked">%1$s, naka-lock</string>
+    <string name="learn_this_sign">Alamin ang sign na ito</string>
+    <string name="im_ready">Handa na ako, subukan</string>
+    <string name="watch_again">Panoorin ulit</string>
+    <string name="slow_motion">Mabagal</string>
+    <string name="hint_default">Gayahin ang galaw na nakikita mo</string>
+    <string name="done">Tapos na</string>
+    <string name="close">Isara</string>
+    <string name="sign_title">Sign: %1$s</string>
+    <string name="tracking_points">Sinusubaybayan ang 21 puntos</string>
+    <string name="sheet_great">Galing! Iyan ay %1$s</string>
+    <string name="sheet_almost">Malapit na!</string>
+    <string name="sheet_keep">Magsanay pa</string>
+    <string name="btn_continue">Magpatuloy</string>
+    <string name="profile_bookings_sub">Mga nakaraan at paparating na session</string>
+</resources>

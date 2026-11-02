@@ -73,4 +73,53 @@
         <item name="android:statusBarColor">@color/senyas_icon_bg</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- Redesign (Duolingo-style): big chunky buttons with a darker bottom edge. Use on a TextView. -->
+    <style name="Widget.Senyas.Btn3D" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+    <style name="Widget.Senyas.Btn3D.Primary">
+        <item name="android:background">@drawable/btn_primary</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="Widget.Senyas.Btn3D.Yellow">
+        <item name="android:background">@drawable/btn_yellow</item>
+        <item name="android:textColor">@color/navy</item>
+    </style>
+    <style name="Widget.Senyas.Btn3D.Success">
+        <item name="android:background">@drawable/btn_success</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+    <style name="Widget.Senyas.Btn3D.Secondary">
+        <item name="android:background">@drawable/btn_secondary</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="Widget.Senyas.LinkBtn" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <!-- Turns off the default Material pill so only the outlined box (nav_item_bg) shows,
+         on the bottom bar and on the landscape rail alike. -->
+    <style name="Widget.Senyas.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@android:color/transparent</item>
+    </style>
 </resources>

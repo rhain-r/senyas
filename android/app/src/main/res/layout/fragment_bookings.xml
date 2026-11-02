@@ -5,6 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- Shown by BookingsFragment (a pushed screen). TutorSessionsFragment (a tab) keeps tv_page_title. -->
+    <include
+        android:id="@+id/top_bar"
+        layout="@layout/view_top_bar"
+        android:visibility="gone" />
+
     <TextView android:id="@+id/tv_page_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingTop="16dp" android:text="@string/my_bookings" android:textColor="@color/text_primary" android:textSize="26sp" android:textStyle="bold" />
 
     <com.google.android.material.button.MaterialButtonToggleGroup

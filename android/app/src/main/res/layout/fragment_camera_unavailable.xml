@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Camera access is off: a 3D card with the camera icon, the explanation, and 3D buttons. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/surface"
     android:orientation="vertical">
 
     <include layout="@layout/view_top_bar" />
@@ -10,26 +12,72 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="20dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="20dp">
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:background="@drawable/bg_tile"
-                android:backgroundTint="@color/skeleton"
-                android:contentDescription="@string/camera_access_is_off">
+                android:layout_height="220dp"
+                android:background="@drawable/bg_card_tinted">
 
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="@string/camera_access_is_off" android:textColor="@color/text_primary" android:textSize="14sp" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <FrameLayout
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/bg_circle_white">
+
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_practice"
+                            app:tint="@color/senyas_blue" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/camera_access_is_off"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </FrameLayout>
 
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/allow_access_to_practice" android:textColor="@color/text_primary" android:textSize="28sp" android:textStyle="bold" />
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/enable_camera_access_in_your" android:textColor="@color/text_secondary" android:textSize="15sp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/allow_access_to_practice"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/enable_camera_access_in_your"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp" />
         </LinearLayout>
     </ScrollView>
 
@@ -38,9 +86,20 @@
         android:layout_height="wrap_content"
         android:background="@color/surface"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="20dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
 
-        <com.google.android.material.button.MaterialButton android:id="@+id/btn_settings" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/open_camera_settings" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/btn_watch" style="?attr/materialButtonOutlinedStyle" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="8dp" android:text="@string/watch_the_lesson_instead" android:textSize="16sp" android:textStyle="bold" app:cornerRadius="16dp" />
+        <TextView
+            android:id="@+id/btn_settings"
+            style="@style/Widget.Senyas.Btn3D.Primary"
+            android:text="@string/open_camera_settings" />
+
+        <TextView
+            android:id="@+id/btn_watch"
+            style="@style/Widget.Senyas.Btn3D.Secondary"
+            android:layout_marginTop="12dp"
+            android:text="@string/watch_the_lesson_instead" />
     </LinearLayout>
 </LinearLayout>

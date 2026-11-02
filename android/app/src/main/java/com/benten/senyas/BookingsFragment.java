@@ -32,6 +32,12 @@ public class BookingsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
+        // Opened from Profile or a confirmation, so it gets a top bar with Back. The tutor's
+        // Sessions tab reuses this layout and keeps the plain page title instead.
+        v.findViewById(R.id.top_bar).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.tv_page_title).setVisibility(View.GONE);
+        Ui.bindTopBar(v, getString(R.string.my_bookings), requireActivity());
+
         list = v.findViewById(R.id.list);
         emptyView = v.findViewById(R.id.empty_view);
         tvEmptyTitle = v.findViewById(R.id.tv_empty_title);

@@ -28,4 +28,18 @@
     <color name="paper_blue">#DFE5FF</color>
     <color name="paper_grey">#E6E8EE</color>
     <color name="senyas_icon_bg">#1E3AB8</color>
+
+    <!-- Redesign (Duolingo-style): darker "edge" shades under the chunky 3D buttons, cards and path nodes -->
+    <color name="blue_edge">#152B8A</color>
+    <color name="yellow_edge">#E0A000</color>
+    <color name="success_green">#1E8E4E</color>
+    <color name="success_edge">#0F6B35</color>
+    <color name="blue_container_edge">#C3CDF5</color>
+    <color name="node_locked">#E6E8EE</color>
+    <color name="node_locked_edge">#CDD1DC</color>
+    <color name="senyas_nav_active">#1E3AB8</color>
+    <color name="senyas_nav_idle">#8A94B8</color>
+    <color name="home_pattern_a">#1E3AB8</color>
+    <color name="home_pattern_b">#2A48CC</color>
+    <color name="cheek_pink">#F08FA8</color>
 </resources>

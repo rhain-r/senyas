@@ -28,26 +28,27 @@ Against signers it has never seen, it accepts 87% of correct signs and wrongly a
 
 ## 2. Features
 
+- **Home and learning path.** A mascot greets the learner with their streak, XP and daily goal, and the Path tab shows every sign as done, current or locked.
 - **Practice scenarios.** Three everyday situations (sari-sari store, jeepney, public services) teach 20 signs in context.
 - **Built-in videos.** Every practice sign has an FSL-105 demonstration video inside the APK, so nothing has to be downloaded.
-- **AI Practice Room.** The front camera scores the whole sign, start to finish; a held pose never passes.
+- **AI Practice Room.** The front camera scores the whole sign, start to finish; a held pose never passes. A result sheet shows the match and the next tip.
 - **Corrections in plain words.** Tips such as "At the start: straighten your index finger" appear in English and Filipino.
 - **Hands of one signer only.** A face check rejects feet and stray objects, and the room says when there are too many hands or people.
 - **Accounts on the device.** Each account keeps its own scores, streak and bookings; a new account starts empty.
 - **Sign dictionary.** Typed or spoken search finds 26 signs, each with its video.
 - **Tutor marketplace.** Learners book Deaf tutors, tutors publish lessons, and an admin console reviews listings and payouts.
 - **Sign Lab.** Educators can record signs and test recognition for words that have no built-in reference yet.
-- **Portrait and landscape.** Every screen adapts to both orientations, with a navigation rail in landscape.
+- **Portrait and landscape.** Every screen adapts to both orientations, with an icon bar in portrait and a navigation rail in landscape.
 
 ## 3. Screenshots
 
-| New account, Learn (landscape) | AI Practice Room (landscape) | AI Practice Room (portrait) |
-| --- | --- | --- |
-| ![Learn](docs/screenshots/learn-landscape.png) | ![Practice](docs/screenshots/practice-landscape.png) | ![Practice portrait](docs/screenshots/practice-portrait.png) |
+| Home (new account) | Learning path | Sign lesson | AI Practice Room |
+| --- | --- | --- | --- |
+| ![Home](docs/screenshots/home.png) | ![Path](docs/screenshots/path.png) | ![Lesson](docs/screenshots/lesson.png) | ![Practice](docs/screenshots/practice.png) |
 
-| Sign lesson with video | Register |
+| Sign lesson (landscape) | Learning path (landscape) |
 | --- | --- |
-| ![Lesson](docs/screenshots/lesson-landscape.png) | ![Register](docs/screenshots/register-landscape.png) |
+| ![Lesson landscape](docs/screenshots/lesson-landscape.png) | ![Path landscape](docs/screenshots/path-landscape.png) |
 
 ## 4. System design
 
@@ -60,7 +61,7 @@ The practice pipeline runs fully on the phone; no frame leaves the device.
 | 3 | MediaPipe Face Detector | Finds faces in the same frame, so only a person's hands count. |
 | 4 | `HandGate` | Keeps at most two hands of one signer inside the signing space around the face. |
 | 5 | `SignScorer` | Aligns the movement with the built-in references and scores six parameters. |
-| 6 | `PracticeFragment` | Shows the score, the most useful tip and the finger colours on the overlay. |
+| 6 | `PracticeFragment` | Shows the score, the most useful tip, the finger colours and the result sheet. |
 
 App code lives in three Java packages:
 

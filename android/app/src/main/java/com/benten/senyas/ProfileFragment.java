@@ -76,6 +76,11 @@ public class ProfileFragment extends Fragment {
                     : getResources().getQuantityString(R.plurals.lessons_completed, done, done));
         }
 
+        // Bookings left the tab bar; learners reach their sessions from here.
+        if (Repo.role == Repo.ROLE_LEARNER || Repo.role == Repo.ROLE_STUDENT) {
+            addRow(getString(R.string.nav_bookings), getString(R.string.profile_bookings_sub),
+                    () -> ((MainActivity) requireActivity()).open(new BookingsFragment()));
+        }
         addRow(getString(R.string.notifications_title), getString(R.string.notif_summary, Repo.unreadCount()),
                 () -> ((MainActivity) requireActivity()).open(new NotificationsFragment()));
 

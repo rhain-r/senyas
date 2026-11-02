@@ -15,10 +15,16 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-public class CameraUnavailableFragment extends Fragment {
+/** Camera access is off: open the phone's settings, or watch the signed lesson instead. */
+public class CameraUnavailableFragment extends Fragment implements StatusTint {
 
     /** True when this opened because access was refused (not the long-press preview). */
     private boolean deniedAtOpen;
+
+    @Override
+    public int statusColor() {
+        return R.color.surface; // the screen's own background, up to the top edge
+    }
 
     @Override
     public void onCreate(@Nullable Bundle b) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Practice Room and sign lesson strings added when the redesign was merged with the camera AI. -->
+<resources>
+    <string name="practice_xp_chip_desc">Ipasa ang sign na ito para makakuha ng %1$d XP</string>
+    <string name="practice_allow_camera">Payagan ang camera</string>
+</resources>

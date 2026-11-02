@@ -37,9 +37,12 @@ public class ConfirmedFragment extends Fragment {
         Repo.Booking bk = Repo.findBooking(args == null ? null : args.getString(ARG_REF));
         if (bk == null) bk = Repo.lastBooking;
         if (bk == null) {
-            // Nothing to show (e.g. it was cancelled): go to the bookings list once the screen is restored.
+            // Nothing to show (e.g. it was cancelled): swap this screen for the bookings list once it
+            // is restored. Popping it first keeps Back from landing here and reopening the list.
             v.post(() -> {
-                if (isAdded()) ((MainActivity) requireActivity()).selectTab(R.id.nav_bookings);
+                if (!isAdded() || getParentFragmentManager().isStateSaved()) return;
+                getParentFragmentManager().popBackStack();
+                ((MainActivity) requireActivity()).open(new BookingsFragment());
             });
             return;
         }
@@ -52,7 +55,8 @@ public class ConfirmedFragment extends Fragment {
                 getString(R.string.confirmed_paid, Ui.peso(bk.price), bk.payment));
         ((TextView) v.findViewById(R.id.tv_ref)).setText(getString(R.string.confirmed_ref, bk.reference));
 
+        // Bookings is no longer a tab: it opens on top, like it does from Profile.
         v.findViewById(R.id.btn_view_bookings).setOnClickListener(x ->
-                ((MainActivity) requireActivity()).selectTab(R.id.nav_bookings));
+                ((MainActivity) requireActivity()).open(new BookingsFragment()));
     }
 }

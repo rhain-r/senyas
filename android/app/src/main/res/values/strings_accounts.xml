@@ -39,7 +39,7 @@
     <string name="learn_next">Next up: %1$s</string>
 
     <!-- Profile -->
-    <string name="profile_learner_none">No signs practiced yet. Pick a lesson in Learn to start.</string>
+    <string name="profile_learner_none">No signs practiced yet. Open the Path tab to start.</string>
 
     <!-- Live classroom -->
     <string name="your_tutor">Your tutor</string>

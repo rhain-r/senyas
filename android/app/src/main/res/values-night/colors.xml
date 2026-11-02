@@ -15,4 +15,11 @@
     <color name="warning_container">#4A3A0A</color>
     <color name="warning_text">#FFD66B</color>
     <color name="error">#FF8A80</color>
+
+    <!-- Redesign -->
+    <color name="blue_container_edge">#1A2550</color>
+    <color name="node_locked">#2B3158</color>
+    <color name="node_locked_edge">#1F2547</color>
+    <color name="senyas_nav_active">#9DB0FF</color>
+    <color name="senyas_nav_idle">#6B77A8</color>
 </resources>
