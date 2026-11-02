@@ -81,7 +81,7 @@ public final class Ui {
         v.setTextSize(14);
         v.setTypeface(null, Typeface.BOLD);
         v.setGravity(Gravity.END);
-        v.setTextColor(c.getColor(R.color.navy));
+        v.setTextColor(c.getColor(R.color.text_primary)); // light in dark mode, so it stays readable
         row.addView(v, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f));
         parent.addView(row);
     }

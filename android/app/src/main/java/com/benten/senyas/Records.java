@@ -15,6 +15,7 @@ final class Records {
     static JSONObject booking(Repo.Booking b) throws JSONException {
         return new JSONObject().put("title", b.title).put("tutor", b.tutor).put("day", b.dayLabel)
                 .put("time", b.timeRange).put("payment", b.payment).put("ref", b.reference)
+                .put("date", b.date).put("start", b.startMin)
                 .put("duration", b.duration).put("price", b.price).put("past", b.past);
     }
 
@@ -26,6 +27,8 @@ final class Records {
         b.timeRange = o.optString("time", "");
         b.payment = o.optString("payment", "");
         b.reference = o.optString("ref", "");
+        b.date = o.optString("date", "");
+        b.startMin = o.optInt("start", -1);
         b.duration = o.optInt("duration", 60);
         b.price = o.optInt("price", 0);
         b.past = o.optBoolean("past", false);
@@ -47,7 +50,8 @@ final class Records {
                 .put("initials", l.initials).put("category", l.category).put("description", l.description)
                 .put("km", l.distanceKm).put("price", l.price).put("duration", l.duration)
                 .put("previewSeconds", l.previewSeconds).put("tile", l.tileColor).put("available", l.available)
-                .put("darkText", l.darkText).put("city", l.city).put("day", l.day).put("slots", l.slots)
+                .put("darkText", l.darkText).put("city", l.city).put("days", l.days)
+                .put("times", new org.json.JSONArray(l.times))
                 .put("created", l.created).put("hasCover", l.hasCover).put("hasPreview", l.hasPreview)
                 .put("reviewed", l.reviewed);
     }
@@ -59,8 +63,15 @@ final class Records {
                 o.optString("description", ""), o.optInt("previewSeconds", 0), o.optInt("tile", 0xFF1E3AB8),
                 o.optBoolean("darkText", false));
         l.city = o.optString("city", l.city);
-        l.day = o.optString("day", l.day);
-        l.slots = o.optString("slots", l.slots);
+        l.days = o.optInt("days", Availability.MON_TO_SAT); // older saves had one free-text day
+        org.json.JSONArray times = o.optJSONArray("times");
+        if (times != null) {
+            java.util.List<Integer> t = new java.util.ArrayList<>();
+            for (int i = 0; i < times.length(); i++) t.add(times.optInt(i, -1));
+            l.times = Availability.normalize(t);
+        } else if (o.has("slots")) {
+            l.times = Availability.parseLegacy(o.optString("slots", "")); // older saves: free text
+        }
         l.created = o.optString("created", l.created);
         l.hasCover = o.optBoolean("hasCover", false);
         l.hasPreview = o.optBoolean("hasPreview", false);
@@ -72,6 +83,7 @@ final class Records {
         return new JSONObject().put("learner", s.learner).put("tutor", s.tutor).put("tutorKey", s.tutorKey)
                 .put("title", s.title).put("category", s.category).put("day", s.dayLabel)
                 .put("time", s.timeRange).put("ref", s.reference).put("duration", s.duration)
+                .put("date", s.date).put("start", s.startMin)
                 .put("price", s.price).put("past", s.past);
     }
 
@@ -85,6 +97,8 @@ final class Records {
         s.dayLabel = o.optString("day", "");
         s.timeRange = o.optString("time", "");
         s.reference = o.optString("ref", "");
+        s.date = o.optString("date", "");
+        s.startMin = o.optInt("start", -1);
         s.duration = o.optInt("duration", 60);
         s.price = o.optInt("price", 0);
         s.past = o.optBoolean("past", false);

@@ -191,12 +191,15 @@ public class LoginActivity extends AppCompatActivity {
         clearErrors();
         boolean ok = true;
 
-        String name = text(etName);
+        String name = text(etName).replaceAll("\\s+", " ");
         String email = text(etEmail);
         String password = etPassword.getText() == null ? "" : etPassword.getText().toString();
 
         if (registerMode && name.isEmpty()) {
             tilName.setError(getString(R.string.err_name));
+            ok = false;
+        } else if (registerMode && !InputRules.isPersonName(name)) {
+            tilName.setError(getString(R.string.err_name_format));
             ok = false;
         }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {

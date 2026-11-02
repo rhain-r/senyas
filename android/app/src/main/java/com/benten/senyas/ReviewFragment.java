@@ -35,11 +35,13 @@ public class ReviewFragment extends Fragment {
     private int kind; // 0 GCash, 1 Maya, 2 Card
 
     /** The chosen slot travels in the arguments, so the screen survives the app being closed. */
-    public static ReviewFragment newInstance(int lessonId, String day, int startMin, int duration, int price) {
+    public static ReviewFragment newInstance(int lessonId, String day, String isoDate, int startMin, int duration,
+                                             int price) {
         ReviewFragment f = new ReviewFragment();
         Bundle a = new Bundle();
         a.putInt("id", lessonId);
         a.putString("day", day);
+        a.putString("date", isoDate);
         a.putInt("start", startMin);
         a.putInt("duration", duration);
         a.putInt("price", price);
@@ -149,6 +151,7 @@ public class ReviewFragment extends Fragment {
         if (l == null) return false;
         Repo.draftLesson = l;
         Repo.draftDay = a.getString("day", Repo.draftDay);
+        Repo.draftDate = a.getString("date", Repo.draftDate);
         Repo.draftStartMin = a.getInt("start", Repo.draftStartMin);
         Repo.draftDuration = a.getInt("duration", Repo.draftDuration);
         Repo.draftPrice = a.getInt("price", Repo.draftPrice);

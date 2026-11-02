@@ -74,12 +74,13 @@ public class SavedDataTest {
         Lesson l = new Lesson(104, "FSL for Cashiers", "Rina Cruz", "RC", Repo.CAT_VOC, 1.2, 300, 30, true,
                 "Counting change in FSL.", 30, 0xFF1E3AB8, false);
         l.reviewed = false;
-        l.slots = "9:00 am";
+        l.days = Availability.bit(java.time.DayOfWeek.SATURDAY);
+        l.times = java.util.Arrays.asList(9 * 60, 13 * 60 + 30);
         m.lessons.add(l);
         m.owners.put(104, "rina@email.com");
         Repo.TutorSession s = new Repo.TutorSession();
         s.learner = "Ana Reyes"; s.tutor = "Rina Cruz"; s.tutorKey = "rina@email.com"; s.title = l.title;
-        s.reference = "SEN-840";
+        s.reference = "SEN-840"; s.date = "2026-11-07"; s.startMin = 9 * 60;
         m.sessions.add(s);
         Repo.Payout p = new Repo.Payout();
         p.title = l.title; p.tutor = "Rina Cruz"; p.tutorKey = "rina@email.com"; p.amount = 300;
@@ -91,13 +92,16 @@ public class SavedDataTest {
         Lesson bl = back.lessons.get(0);
         assertEquals(104, bl.id);
         assertEquals("FSL for Cashiers", bl.title);
-        assertEquals("9:00 am", bl.slots);
+        assertEquals(Availability.bit(java.time.DayOfWeek.SATURDAY), bl.days);
+        assertEquals(java.util.Arrays.asList(9 * 60, 13 * 60 + 30), bl.times);
         assertFalse(bl.reviewed);
         assertEquals(0xFF1E3AB8, bl.tileColor);
         assertEquals("rina@email.com", back.owners.get(104));
         assertEquals(105, back.nextLessonId); // past every saved listing
         assertEquals(841, back.nextRef);
         assertEquals("rina@email.com", back.sessions.get(0).tutorKey);
+        assertEquals("2026-11-07", back.sessions.get(0).date);
+        assertEquals(9 * 60, back.sessions.get(0).startMin);
         assertEquals(300, back.payouts.get(0).amount);
         assertEquals("rina@email.com", back.payouts.get(0).tutorKey);
     }

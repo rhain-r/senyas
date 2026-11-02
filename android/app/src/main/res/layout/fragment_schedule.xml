@@ -29,11 +29,6 @@
                 android:layout_marginTop="8dp"
                 app:selectionRequired="true"
                 app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip android:id="@+id/chip_d0" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Mon 19" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_d1" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tue 20" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_d2" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Wed 21" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_d3" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Thu 22" />
             </com.google.android.material.chip.ChipGroup>
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:text="@string/row_duration" android:textColor="@color/text_primary" android:textSize="16sp" android:textStyle="bold" />
@@ -59,11 +54,6 @@
                 android:layout_marginTop="8dp"
                 app:selectionRequired="true"
                 app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip android:id="@+id/chip_t0" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_t1" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_t2" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-                <com.google.android.material.chip.Chip android:id="@+id/chip_t3" style="@style/Widget.Senyas.Chip" android:layout_width="wrap_content" android:layout_height="wrap_content" />
             </com.google.android.material.chip.ChipGroup>
 
             <TextView

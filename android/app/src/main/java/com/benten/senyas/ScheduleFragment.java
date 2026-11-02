@@ -14,19 +14,30 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
-public class ScheduleFragment extends Fragment {
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-    private static final int[] DAY_IDS = {R.id.chip_d0, R.id.chip_d1, R.id.chip_d2, R.id.chip_d3};
-    private static final String[] DAY_SHORT = {"Mon 19 Oct", "Tue 20 Oct", "Wed 21 Oct", "Thu 22 Oct"};
-    private static final String[] DAY_FULL = {"Mon, 19 October 2026", "Tue, 20 October 2026",
-            "Wed, 21 October 2026", "Thu, 22 October 2026"};
-    private static final int[] TIME_IDS = {R.id.chip_t0, R.id.chip_t1, R.id.chip_t2, R.id.chip_t3};
-    private static final int[] TIME_START = {14 * 60, 15 * 60, 16 * 60, 18 * 60};
-    private static final int BOOKED_INDEX = 0; // dummy: first slot is already taken
+/**
+ * The learner picks a session from the tutor's own availability: the next open dates in the
+ * coming two weeks and the start times the tutor offers. A time shows as booked only when a real
+ * session (by any learner) already takes it.
+ */
+public class ScheduleFragment extends Fragment {
+    private static final int HORIZON_DAYS = 14, MAX_DATES = 8;
+    /** A time today must start at least this far ahead to be bookable. */
+    private static final int LEAD_MIN = 60;
 
     private Lesson lesson;
-    private int dayIndex = 0, timeIndex = 1, duration;
-    private TextView tvSummary;
+    private final List<LocalDate> dates = new ArrayList<>();
+    private int dateIndex, startMin = -1, duration;
+    private ChipGroup cgTime;
+    private TextView tvSummary, tvNote;
+    private View btnReview;
+    private DateTimeFormatter shortDate, fullDate;
 
     public static ScheduleFragment newInstance(int lessonId) {
         ScheduleFragment f = new ScheduleFragment();
@@ -46,54 +57,113 @@ public class ScheduleFragment extends Fragment {
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
         Ui.bindTopBar(v, getString(R.string.title_choose_schedule), requireActivity());
         lesson = Repo.byId(requireArguments().getInt("id"));
-        duration = lesson.duration;
+        duration = b != null ? b.getInt("duration", lesson.duration) : lesson.duration;
+        dateIndex = b != null ? b.getInt("date", 0) : 0;
+        startMin = b != null ? b.getInt("start", -1) : -1;
+        Locale locale = getResources().getConfiguration().getLocales().get(0);
+        shortDate = DateTimeFormatter.ofPattern("EEE d MMM", locale);
+        fullDate = DateTimeFormatter.ofPattern("EEE, d MMMM yyyy", locale);
+
         tvSummary = v.findViewById(R.id.tv_summary);
-
+        tvNote = v.findViewById(R.id.tv_note);
+        cgTime = v.findViewById(R.id.cg_time);
+        btnReview = v.findViewById(R.id.btn_review);
         ((TextView) v.findViewById(R.id.tv_lesson_line)).setText(lesson.tutor + " · " + lesson.title);
-        ((TextView) v.findViewById(R.id.tv_note)).setText(
-                getString(R.string.slot_booked_note, Ui.clock(TIME_START[BOOKED_INDEX], true)));
 
-        for (int i = 0; i < DAY_IDS.length; i++) ((Chip) v.findViewById(DAY_IDS[i])).setText(DAY_SHORT[i]);
-        for (int i = 0; i < TIME_IDS.length; i++) {
-            Chip c = v.findViewById(TIME_IDS[i]);
-            boolean booked = i == BOOKED_INDEX;
-            c.setText(booked ? getString(R.string.slot_booked_chip, Ui.clock(TIME_START[i], true)) : Ui.clock(TIME_START[i], true));
-            c.setEnabled(!booked);
+        dates.addAll(Availability.nextDates(lesson.days, LocalDate.now(), HORIZON_DAYS, MAX_DATES));
+        if (dateIndex >= dates.size()) dateIndex = 0;
+        ChipGroup cgDay = v.findViewById(R.id.cg_day);
+        LayoutInflater inf = LayoutInflater.from(requireContext());
+        for (int i = 0; i < dates.size(); i++) {
+            Chip c = (Chip) inf.inflate(R.layout.item_choice_chip, cgDay, false);
+            c.setId(View.generateViewId());
+            c.setText(dates.get(i).format(shortDate));
+            final int index = i;
+            c.setOnClickListener(x -> {
+                dateIndex = index;
+                startMin = -1;
+                showTimes();
+            });
+            cgDay.addView(c);
+            if (i == dateIndex) c.setChecked(true);
         }
 
-        ChipGroup cgDay = v.findViewById(R.id.cg_day);
-        ChipGroup cgTime = v.findViewById(R.id.cg_time);
         MaterialButtonToggleGroup toggle = v.findViewById(R.id.toggle_duration);
-
-        cgDay.setOnCheckedStateChangeListener((g, ids) -> {
-            if (ids.isEmpty()) return;
-            dayIndex = Ui.indexOf(DAY_IDS, ids.get(0));
-            update();
-        });
-        cgTime.setOnCheckedStateChangeListener((g, ids) -> {
-            if (ids.isEmpty()) return;
-            timeIndex = Ui.indexOf(TIME_IDS, ids.get(0));
-            update();
-        });
+        toggle.check(duration == 30 ? R.id.btn_dur30 : R.id.btn_dur60);
         toggle.addOnButtonCheckedListener((g, id, checked) -> {
             if (!checked) return;
             duration = id == R.id.btn_dur30 ? 30 : 60;
-            update();
+            showTimes(); // a longer session can clash with a booking the shorter one missed
         });
 
-        cgDay.check(DAY_IDS[dayIndex]);
-        cgTime.check(TIME_IDS[timeIndex]);
-        toggle.check(duration == 30 ? R.id.btn_dur30 : R.id.btn_dur60);
-
-        v.findViewById(R.id.btn_review).setOnClickListener(x -> {
+        btnReview.setOnClickListener(x -> {
+            if (dates.isEmpty() || startMin < 0) return;
+            LocalDate d = dates.get(dateIndex);
             Repo.draftLesson = lesson;
-            Repo.draftDay = DAY_FULL[dayIndex];
-            Repo.draftStartMin = TIME_START[timeIndex];
+            Repo.draftDay = d.format(fullDate);
+            Repo.draftDate = d.toString();
+            Repo.draftStartMin = startMin;
             Repo.draftDuration = duration;
             Repo.draftPrice = price();
             ((MainActivity) requireActivity()).open(ReviewFragment.newInstance(lesson.id,
-                    Repo.draftDay, Repo.draftStartMin, Repo.draftDuration, Repo.draftPrice));
+                    Repo.draftDay, Repo.draftDate, Repo.draftStartMin, Repo.draftDuration, Repo.draftPrice));
         });
+        showTimes();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putInt("duration", duration);
+        out.putInt("date", dateIndex);
+        out.putInt("start", startMin);
+    }
+
+    /** The tutor's times on the chosen date: past or booked ones are shown but cannot be picked. */
+    private void showTimes() {
+        if (cgTime == null) return;
+        cgTime.removeAllViews();
+        if (dates.isEmpty() || lesson.times.isEmpty()) {
+            tvNote.setText(R.string.schedule_no_times);
+            tvNote.setVisibility(View.VISIBLE);
+            update();
+            return;
+        }
+        LocalDate d = dates.get(dateIndex);
+        boolean today = d.equals(LocalDate.now());
+        int now = LocalTime.now().toSecondOfDay() / 60;
+        LayoutInflater inf = LayoutInflater.from(requireContext());
+        int firstFree = -1, booked = 0;
+        boolean keep = false;
+        for (int t : lesson.times) {
+            boolean past = today && t < now + LEAD_MIN;
+            boolean taken = !past && Repo.isBooked(lesson, d.toString(), t, duration);
+            Chip c = (Chip) inf.inflate(R.layout.item_choice_chip, cgTime, false);
+            c.setId(View.generateViewId());
+            c.setText(taken ? getString(R.string.slot_booked_chip, Ui.clock(t, true)) : Ui.clock(t, true));
+            c.setEnabled(!past && !taken);
+            if (taken) booked++;
+            if (past || taken) {
+                if (past) c.setVisibility(View.GONE);
+            } else {
+                if (firstFree < 0) firstFree = t;
+                if (t == startMin) keep = true;
+                c.setOnClickListener(x -> {
+                    startMin = t;
+                    update();
+                });
+            }
+            c.setTag(t);
+            cgTime.addView(c);
+        }
+        if (!keep) startMin = firstFree;
+        for (int i = 0; i < cgTime.getChildCount(); i++) {
+            Chip c = (Chip) cgTime.getChildAt(i);
+            if ((int) c.getTag() == startMin) c.setChecked(true);
+        }
+        tvNote.setText(startMin < 0 ? getString(R.string.schedule_day_full)
+                : booked > 0 ? getString(R.string.schedule_booked_note) : "");
+        tvNote.setVisibility(tvNote.getText().length() == 0 ? View.GONE : View.VISIBLE);
         update();
     }
 
@@ -103,7 +173,9 @@ public class ScheduleFragment extends Fragment {
 
     private void update() {
         if (tvSummary == null) return;
-        tvSummary.setText(DAY_SHORT[dayIndex] + " · " + Ui.timeRange(TIME_START[timeIndex], duration)
-                + " · " + Ui.peso(price()));
+        boolean ready = !dates.isEmpty() && startMin >= 0;
+        btnReview.setEnabled(ready);
+        tvSummary.setText(ready ? dates.get(dateIndex).format(shortDate) + " · "
+                + Ui.timeRange(startMin, duration) + " · " + Ui.peso(price()) : getString(R.string.schedule_pick));
     }
 }

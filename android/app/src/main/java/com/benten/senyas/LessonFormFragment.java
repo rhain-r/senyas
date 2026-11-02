@@ -25,7 +25,7 @@ public class LessonFormFragment extends Fragment {
     private boolean editing;
     private Lesson lesson;
     private int duration, rate;
-    private TextInputLayout tilTitle, tilRate;
+    private TextInputLayout tilTitle, tilDesc, tilRate;
     private TextInputEditText etTitle, etDesc, etRate;
     private MaterialAutoCompleteTextView actvCat;
     private View banner;
@@ -54,6 +54,7 @@ public class LessonFormFragment extends Fragment {
 
         Ui.bindTopBar(v, getString(editing ? R.string.title_edit_lesson : R.string.title_new_lesson), requireActivity());
         tilTitle = v.findViewById(R.id.til_title);
+        tilDesc = v.findViewById(R.id.til_desc);
         tilRate = v.findViewById(R.id.til_rate);
         etTitle = v.findViewById(R.id.et_title);
         etDesc = v.findViewById(R.id.et_desc);
@@ -109,10 +110,19 @@ public class LessonFormFragment extends Fragment {
 
     private boolean validate() {
         tilTitle.setError(null);
+        tilDesc.setError(null);
         tilRate.setError(null);
         boolean ok = true;
-        if (text(etTitle).isEmpty()) {
+        String title = text(etTitle).replaceAll("\\s+", " ");
+        if (title.isEmpty()) {
             tilTitle.setError(getString(R.string.err_title));
+            ok = false;
+        } else if (!InputRules.isTitle(title)) {
+            tilTitle.setError(getString(R.string.err_title_format));
+            ok = false;
+        }
+        if (!InputRules.isDescription(text(etDesc))) {
+            tilDesc.setError(getString(R.string.err_desc_format));
             ok = false;
         }
         String r = text(etRate);
@@ -125,11 +135,14 @@ public class LessonFormFragment extends Fragment {
             if (rate <= 0) {
                 tilRate.setError(getString(R.string.err_rate_zero));
                 ok = false;
+            } else if (!InputRules.isRate(rate)) {
+                tilRate.setError(getString(R.string.err_rate_range));
+                ok = false;
             }
         }
         banner.setVisibility(ok ? View.GONE : View.VISIBLE);
         // On a short (landscape) screen the field can be out of view: scroll it in.
-        if (!ok) (tilTitle.getError() != null ? etTitle : etRate).requestFocus();
+        if (!ok) (tilTitle.getError() != null ? etTitle : tilDesc.getError() != null ? etDesc : etRate).requestFocus();
         return ok;
     }
 

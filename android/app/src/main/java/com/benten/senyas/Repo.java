@@ -102,7 +102,9 @@ public final class Repo {
 
     // ----- booking draft + confirmed bookings -----
     public static Lesson draftLesson;
-    public static String draftDay = "Mon, 19 October 2026";
+    public static String draftDay = "";
+    /** The draft's date (ISO yyyy-MM-dd), so bookings can be checked for clashes. */
+    public static String draftDate = "";
     public static int draftStartMin = 15 * 60;
     public static int draftDuration = 60;
     public static int draftPrice = 400;
@@ -111,6 +113,9 @@ public final class Repo {
 
     public static class Booking {
         public String title, tutor, dayLabel, timeRange, payment, reference;
+        /** ISO date and start minute of the session ("" / -1 for bookings saved by older versions). */
+        public String date = "";
+        public int startMin = -1;
         public int duration, price;
         public boolean past;
     }
@@ -128,6 +133,8 @@ public final class Repo {
         b.title = draftLesson.title;
         b.tutor = draftLesson.tutor;
         b.dayLabel = draftDay;
+        b.date = draftDate;
+        b.startMin = draftStartMin;
         b.timeRange = Ui.timeRange(draftStartMin, draftDuration);
         b.duration = draftDuration;
         b.price = draftPrice;
@@ -139,6 +146,8 @@ public final class Repo {
         TutorSession s = session(userName, draftLesson.tutor, draftLesson.title, draftLesson.category,
                 b.dayLabel, b.timeRange, b.duration, b.price, b.reference, false);
         s.tutorKey = tutorKey;
+        s.date = draftDate;
+        s.startMin = draftStartMin;
         TUTOR_SESSIONS.add(0, s);
         Payout p = payout(draftLesson.title, draftLesson.tutor, draftPrice, false);
         p.tutorKey = tutorKey;
@@ -152,6 +161,19 @@ public final class Repo {
         draftLesson = null; // a second tap on Pay books nothing
         save();
         return b;
+    }
+
+    /**
+     * Whether this lesson's tutor already has a session that overlaps the given time: booked by
+     * anyone, so two learners never get the same slot. Cancelled bookings are removed, so free again.
+     */
+    public static boolean isBooked(Lesson lesson, String isoDate, int startMin, int duration) {
+        for (TutorSession s : TUTOR_SESSIONS) {
+            if (s.past || s.startMin < 0 || !isoDate.equals(s.date)) continue;
+            boolean sameTutor = s.tutorKey != null ? s.tutorKey.equals(OWNERS.get(lesson.id)) : s.tutor.equals(lesson.tutor);
+            if (sameTutor && Availability.overlaps(startMin, duration, s.startMin, s.duration)) return true;
+        }
+        return false;
     }
 
     /** The account's booking with this reference, or null. */
@@ -215,6 +237,9 @@ public final class Repo {
     /** One booked session, seen by the tutor (Sessions tab) and the admin (dashboard). */
     public static class TutorSession {
         public String learner, tutor, title, category, dayLabel, timeRange, reference;
+        /** ISO date and start minute of the session ("" / -1 for sample or older sessions). */
+        public String date = "";
+        public int startMin = -1;
         public String tutorKey; // email key of a tutor account; null for the sample tutors
         public int duration, price;
         public boolean past;
@@ -249,8 +274,8 @@ public final class Repo {
         draft.hasCover = false;
         draft.hasPreview = false;
         draft.created = TODAY;
-        draft.day = "Friday, 23 October 2026";
-        draft.slots = "";
+        draft.days = 0; // the tutor picks days and times in step 2
+        draft.times = new java.util.ArrayList<>();
     }
 
     /** Publishes the new-lesson draft; null when there is none or it has no title or rate. */
