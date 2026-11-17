@@ -4,11 +4,6 @@
 
 **Learn Filipino Sign Language on your phone, with a camera that checks your signing.**
 
-![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)
-![Java 11](https://img.shields.io/badge/Java-11-007396)
-![Version 1.5](https://img.shields.io/badge/version-1.5-1E3A8A)
-![License: MIT](https://img.shields.io/badge/license-MIT-yellow)
-
 </div>
 
 Many hearing Filipinos want to learn Filipino Sign Language (FSL) so they can talk with Deaf family members, friends and customers. Practising alone is hard, because nobody tells you whether your hands are doing the right thing.
@@ -59,8 +54,6 @@ All signs and videos come from the FSL-105 dataset (credits below).
 | Oo | Yes | ✅ | ✅ |
 | Hindi | No | ✅ | ✅ |
 | Tatay | Father | ✅ | ✅ |
-| Magandang gabi | Good evening | ✅ | ❌ failed the accuracy test |
-| Nanay | Mother | ✅ | ❌ failed the accuracy test |
 
 Lesson words outside this list, such as *Bili* (buy) or *Para* (stop here), say that no verified video is available yet. You can skip them; skipping never awards XP.
 
