@@ -48,12 +48,13 @@ public class AdminUsersFragment extends Fragment {
     }
 
     private void render() {
+        Repo.syncAccountUsers(new AccountStore(requireContext()));
         list.removeAllViews();
         tvSub.setText(getString(R.string.admin_users_sub, Repo.USERS.size()));
         LayoutInflater inf = LayoutInflater.from(requireContext());
         for (Repo.User u : Repo.USERS) {
             boolean isTutor = u.role == Repo.ROLE_TUTOR;
-            if (filter == 1 && isTutor) continue;
+            if (filter == 1 && !AccessPolicy.isLearner(u.role)) continue;
             if (filter == 2 && !isTutor) continue;
 
             View row = inf.inflate(R.layout.item_admin_user, list, false);
@@ -65,23 +66,22 @@ public class AdminUsersFragment extends Fragment {
                     u.active ? Ui.Tag.GREEN : Ui.Tag.YELLOW);
 
             MaterialButton toggleBtn = row.findViewById(R.id.btn_toggle);
+            toggleBtn.setVisibility(u.role == Repo.ROLE_ADMIN ? View.GONE : View.VISIBLE);
             toggleBtn.setText(u.active ? R.string.btn_suspend : R.string.btn_reactivate);
             toggleBtn.setOnClickListener(x -> {
-                if (u.active && u.email != null && Repo.isSignedIn(u.email)) {
-                    Toast.makeText(requireContext(), R.string.toast_cannot_suspend_self, Toast.LENGTH_LONG).show();
-                } else if (u.active) {
+                if (u.active) {
                     new MaterialAlertDialogBuilder(requireContext())
                             .setTitle(R.string.suspend_title)
                             .setMessage(getString(R.string.suspend_message, u.name))
                             .setNegativeButton(android.R.string.cancel, null)
                             .setPositiveButton(R.string.btn_suspend, (d, w) -> {
-                                Repo.setActive(u, false); // TODO (Firebase batch): disable the account
+                                new AccountStore(requireContext()).setActive(u.accountId, false);
                                 Toast.makeText(requireContext(), R.string.toast_suspended, Toast.LENGTH_SHORT).show();
                                 render();
                             })
                             .show();
                 } else {
-                    Repo.setActive(u, true);
+                    new AccountStore(requireContext()).setActive(u.accountId, true);
                     Toast.makeText(requireContext(), R.string.toast_reactivated, Toast.LENGTH_SHORT).show();
                     render();
                 }

@@ -32,10 +32,10 @@ public class NotificationsFragment extends Fragment {
 
     private static final int[] TITLES = {R.string.notif_t0_title, R.string.notif_t1_title, R.string.notif_t2_title,
             R.string.notif_t3_title, R.string.notif_t4_title, R.string.notif_t5_title, R.string.notif_t6_title,
-            R.string.notif_t7_title, R.string.notif_t8_title};
+            R.string.notif_t7_title};
     private static final int[] BODIES = {R.string.notif_t0_body, R.string.notif_t1_body, R.string.notif_t2_body,
             R.string.notif_t3_body, R.string.notif_t4_body, R.string.notif_t5_body, R.string.notif_t6_body,
-            R.string.notif_t7_body, R.string.notif_t8_body};
+            R.string.notif_t7_body};
 
     private LinearLayout list;
     private TextView tvSummary, tvEmpty;
@@ -60,7 +60,8 @@ public class NotificationsFragment extends Fragment {
         tvEmpty = v.findViewById(R.id.tv_empty);
 
         v.findViewById(R.id.tv_mark_all).setOnClickListener(x -> {
-            for (Repo.Notif n : Repo.NOTIFS) if (n.group == Repo.myGroup()) n.read = true;
+            for (Repo.Notif n : Repo.myNotifications()) n.read = true;
+            Repo.persist();
             render();
         });
 
@@ -91,10 +92,8 @@ public class NotificationsFragment extends Fragment {
     private void render() {
         list.removeAllViews();
         LayoutInflater inf = LayoutInflater.from(requireContext());
-        long now = System.currentTimeMillis();
         int shown = 0, unread = 0;
-        for (Repo.Notif n : Repo.NOTIFS) {
-            if (n.group != Repo.myGroup()) continue;
+        for (Repo.Notif n : Repo.myNotifications()) {
             shown++;
             if (!n.read) unread++;
             View card = inf.inflate(R.layout.item_notification, list, false);
@@ -103,8 +102,8 @@ public class NotificationsFragment extends Fragment {
             title.setText(TITLES[n.type]);
             title.setTypeface(null, n.read ? Typeface.NORMAL : Typeface.BOLD);
             ((TextView) card.findViewById(R.id.tv_body)).setText(getString(BODIES[n.type], n.a, n.b));
-            ((TextView) card.findViewById(R.id.tv_time)).setText(timeAgo(n.minutesAgo(now)));
-            card.setOnClickListener(x -> { n.read = true; render(); });
+            ((TextView) card.findViewById(R.id.tv_time)).setText(timeAgo(n.minutesAgo));
+            card.setOnClickListener(x -> { n.read = true; Repo.persist(); render(); });
             list.addView(card);
         }
         tvSummary.setText(getString(R.string.notif_summary, unread));

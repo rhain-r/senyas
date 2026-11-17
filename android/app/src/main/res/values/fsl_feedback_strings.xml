@@ -1,0 +1,10 @@
+<resources>
+    <string name="feedback_prepare">Perform the complete sign, then briefly lower your hands to check it.</string>
+    <string name="feedback_show_body">Keep your shoulders and hands in view so the sign position can be checked.</string>
+    <string name="feedback_move">Follow the movement in the demonstration, not only the hand shape.</string>
+    <string name="feedback_hold">Finish the sign, then briefly lower your hands to confirm it.</string>
+    <string name="feedback_try_again">Not matched yet. Watch the demonstration and try the full movement again.</string>
+    <string name="feedback_matched">Sign matched. Your verified score has been saved.</string>
+    <string name="feedback_unsupported">Automatic feedback is not available for this sign in this model.</string>
+    <string name="feedback_unavailable">Sign feedback could not start. Reopen practice to try again.</string>
+</resources>

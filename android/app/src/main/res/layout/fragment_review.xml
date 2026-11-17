@@ -78,13 +78,20 @@
         </LinearLayout>
     </ScrollView>
 
-    <LinearLayout style="@style/Senyas.ActionPanel">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView android:id="@+id/tv_total" style="@style/Senyas.ActionPanelInfo" android:textColor="@color/text_primary" android:textSize="22sp" android:textStyle="bold" />
+        <TextView android:id="@+id/tv_total" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_primary" android:textSize="22sp" android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_pay"
-            style="@style/Senyas.ActionPanelButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="12dp"
             android:text="@string/continue_to_payment"
             android:textSize="16sp"
             android:textStyle="bold"

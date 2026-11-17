@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background">#0B1020</color>
     <color name="surface">#1B2140</color>
@@ -16,7 +15,7 @@
     <color name="warning_text">#FFD66B</color>
     <color name="error">#FF8A80</color>
 
-    <!-- Redesign -->
+    <!-- NEW -->
     <color name="blue_container_edge">#1A2550</color>
     <color name="node_locked">#2B3158</color>
     <color name="node_locked_edge">#1F2547</color>

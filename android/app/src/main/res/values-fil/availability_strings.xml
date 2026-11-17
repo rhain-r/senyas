@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="availability_date_error">Pumili ng wastong petsa ng availability.</string>
+    <string name="availability_time_error">Pumili ng wastong oras. Dapat matapos ang aralin bago o pagsapit ng hatinggabi.</string>
+    <string name="availability_past_error">Pumili ng petsa at oras sa hinaharap ayon sa oras ng Pilipinas.</string>
+    <string name="availability_add_time">Magdagdag ng oras</string>
+    <string name="availability_remove_time">Alisin ang %1$s</string>
+    <string name="availability_time_hint">I-tap upang magdagdag o mag-alis ng oras ayon sa oras ng Pilipinas.</string>
+    <string name="availability_dates_hint">I-tap ang kalendaryo para magdagdag ng mga petsa. Alisin ang petsa gamit ang ×. Pareho ang mga oras sa lahat ng napiling petsa.</string>
+    <string name="availability_remove_date">Alisin ang %1$s</string>
+    <string name="availability_dates_limit">Pumili ng hanggang 100 petsa.</string>
+</resources>

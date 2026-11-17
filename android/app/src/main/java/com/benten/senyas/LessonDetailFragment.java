@@ -37,6 +37,14 @@ public class LessonDetailFragment extends Fragment {
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
         Ui.bindTopBar(v, getString(R.string.title_lesson_details), requireActivity());
         Lesson l = Repo.byId(requireArguments().getInt("id"));
+        if (l == null || !l.reviewed) {
+            v.findViewById(R.id.btn_schedule).setEnabled(false);
+            android.widget.Toast.makeText(requireContext(), R.string.listing_details_unavailable, android.widget.Toast.LENGTH_LONG).show();
+            v.post(() -> {
+                if (isAdded() && getView() == v) requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            });
+            return;
+        }
 
         ((TextView) v.findViewById(R.id.tv_title)).setText(l.title);
         Ui.styleTile(v.findViewById(R.id.tile), v.findViewById(R.id.tv_initials), l);
@@ -55,6 +63,12 @@ public class LessonDetailFragment extends Fragment {
 
         v.findViewById(R.id.card_preview).setOnClickListener(x ->
                 Toast.makeText(requireContext(), getString(R.string.toast_preview), Toast.LENGTH_SHORT).show());
+
+        View tvReport = v.findViewById(R.id.tv_report_tutor);
+        if (tvReport != null) {
+            final String tutorName = l.tutor;
+            tvReport.setOnClickListener(x -> new ProfileFragment().showReportUserDialog(tutorName));
+        }
 
         MaterialButton btn = v.findViewById(R.id.btn_schedule);
         TextView note = v.findViewById(R.id.tv_unavailable);

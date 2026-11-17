@@ -18,9 +18,10 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    public void useAppContext() {
+    public void launcherCanBeResolved() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.benten.senyas", appContext.getPackageName());
+        assertNotNull("Android must be able to launch the installed app variant",
+                appContext.getPackageManager().getLaunchIntentForPackage(appContext.getPackageName()));
     }
 }

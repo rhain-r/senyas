@@ -35,46 +35,13 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <!-- Sign Lab: always dark, like the Practice Room, so the camera stands out. -->
-    <style name="Theme.Senyas.Lab" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorOnPrimary">@color/navy</item>
-        <item name="colorSecondary">@color/sun_yellow</item>
-        <item name="android:colorBackground">@color/dark_bg</item>
-        <item name="android:windowBackground">@color/dark_bg</item>
-        <item name="colorSurface">@color/dark_surface</item>
-        <item name="colorOnSurface">@color/white</item>
-        <item name="colorOnSurfaceVariant">@color/text_on_dark</item>
-        <item name="colorOutline">@color/text_on_dark</item>
-        <item name="textInputStyle">@style/Widget.Senyas.TextField.Lab</item>
-    </style>
-
-    <style name="Widget.Senyas.TextField.Lab" parent="Widget.Material3.TextInputLayout.OutlinedBox">
-        <item name="boxCornerRadiusTopStart">12dp</item>
-        <item name="boxCornerRadiusTopEnd">12dp</item>
-        <item name="boxCornerRadiusBottomStart">12dp</item>
-        <item name="boxCornerRadiusBottomEnd">12dp</item>
-    </style>
-
-    <style name="Widget.Senyas.Button.Lab" parent="Widget.Material3.Button">
-        <item name="android:checkable">true</item>
-        <item name="android:minHeight">52dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="cornerRadius">16dp</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="backgroundTint">@color/lab_button_bg</item>
-        <item name="android:textColor">@color/lab_button_text</item>
-    </style>
-
     <style name="Theme.Senyas.Splash" parent="Theme.Senyas">
         <item name="android:windowBackground">@color/senyas_icon_bg</item>
         <item name="android:statusBarColor">@color/senyas_icon_bg</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <!-- Redesign (Duolingo-style): big chunky buttons with a darker bottom edge. Use on a TextView. -->
+    <!-- NEW: Duolingo-style big chunky buttons (use on a TextView) -->
     <style name="Widget.Senyas.Btn3D" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">56dp</item>
@@ -117,8 +84,7 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
-    <!-- Turns off the default Material pill so only the outlined box (nav_item_bg) shows,
-         on the bottom bar and on the landscape rail alike. -->
+    <!-- turns off the default Material pill so only our outlined box shows -->
     <style name="Widget.Senyas.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@android:color/transparent</item>
     </style>

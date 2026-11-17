@@ -1,14 +1,12 @@
 package com.benten.senyas;
 
-import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,73 +19,52 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.google.android.material.navigation.NavigationBarView;
-import com.google.android.material.navigationrail.NavigationRailView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 /**
- * One shell, three experiences. The signed-in account's role (Repo.role) decides the bottom tabs:
- * Learner (Hearing Learner and Deaf Student), Tutor, or Admin (the admin console chosen at login).
+ * One shell, three experiences. The role chosen at login (Repo.role) decides the bottom tabs:
+ * Learner (Hearing Learner and Deaf Student), Tutor, or Admin.
  */
 public class MainActivity extends AppCompatActivity {
 
-    /** The signed-in account's email, and whether it opened the admin console. */
-    public static final String EXTRA_ACCOUNT = "account", EXTRA_ADMIN = "admin";
-
-    private NavigationBarView nav; // a bottom bar in portrait, a side rail in landscape
+    private BottomNavigationView nav;
     private View root, navContainer, navDivider;
     private boolean tabShown = false;
     private int topInset = 0;
-    private int tintColor = 0; // non-zero while a StatusTint screen is showing
+    private int tintColor = 0;   // non-zero while a StatusTint screen is showing
+    private AccountStore accounts;
+    private String signedInId;
+    private int signedInRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        accounts = new AccountStore(this);
+        AccountStore.Account account = accounts.current();
+        boolean sameAccount = account != null && savedInstanceState != null
+                && account.id.equals(savedInstanceState.getString("account_id"));
+        super.onCreate(sameAccount ? savedInstanceState : null);
+        if (account == null) { Repo.clearIdentity(); redirectToLogin(); return; }
+        signedInId = account.id;
+        signedInRole = account.role;
+        Repo.activateAccount(account);
+        if (sameAccount) PracticeSnapshot.restore(savedInstanceState.getBundle("practice"));
+        Repo.syncAccountUsers(accounts);
         setContentView(R.layout.activity_main);
-
-        // A fresh sign-in loads the account from the device. Rotation and other recreations keep
-        // what is already loaded; after the process was killed, the intent loads it again.
-        String email = getIntent().getStringExtra(EXTRA_ACCOUNT);
-        boolean admin = getIntent().getBooleanExtra(EXTRA_ADMIN, false);
-        if (savedInstanceState == null || !Repo.isSignedIn(email)) {
-            AccountStore store = new AccountStore(this);
-            Account account = store.find(email);
-            if (account == null) {
-                Toast.makeText(this, R.string.account_missing, Toast.LENGTH_LONG).show();
-                startActivity(new Intent(this, LoginActivity.class));
-                finish();
-                return;
-            }
-            Repo.signIn(store, account, admin);
-        }
 
         root = findViewById(R.id.root);
         navContainer = findViewById(R.id.nav_container);
         navDivider = findViewById(R.id.nav_divider);
-        nav = findViewById(R.id.bottom_nav);
-        boolean rail = nav instanceof NavigationRailView;
-
-        // Keep content clear of the system bars, the keyboard and (in landscape) the camera cutout.
-        // Portrait: the bar's container takes the bottom inset, so the gesture area gets the bar's colour.
-        // Landscape: the rail's container takes the start-side inset, so the rail reaches the edge.
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars()
-                    | WindowInsetsCompat.Type.displayCutout() | WindowInsetsCompat.Type.ime());
-            if (rail) {
-                boolean rtl = v.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-                int start = rtl ? bars.right : bars.left, end = rtl ? bars.left : bars.right;
-                v.setPaddingRelative(0, bars.top, end, bars.bottom);
-                navContainer.setPaddingRelative(start, 0, 0, 0);
-            } else {
-                v.setPadding(bars.left, bars.top, bars.right, 0);
-                navContainer.setPadding(0, 0, 0, bars.bottom);
-            }
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime());
+            // top/left/right go to the window; the bottom inset goes to the nav bar's own container
+            v.setPadding(bars.left, bars.top, bars.right, 0);
+            navContainer.setPadding(0, 0, 0, bars.bottom);
             topInset = bars.top;
             if (tintColor != 0) paintStatusArea(tintColor);
             return insets;
         });
 
-        // Each screen sets the status-bar area: dark (practice room, live classroom), its header
-        // colour (StatusTint: blue Home and Path), or the normal app background.
+        // Dark screens (practice room, live classroom) tint the status-bar area dark.
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(
                 new FragmentManager.FragmentLifecycleCallbacks() {
                     @Override
@@ -96,11 +73,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }, false);
 
+        nav = findViewById(R.id.bottom_nav);
         nav.getMenu().clear();
         nav.inflateMenu(Repo.role == Repo.ROLE_ADMIN ? R.menu.bottom_nav_admin
                 : Repo.role == Repo.ROLE_TUTOR ? R.menu.bottom_nav_tutor : R.menu.bottom_nav_menu);
 
         nav.setOnItemSelectedListener(item -> {
+            if (!authorize(areaForTab(item.getItemId()))) return false;
             tabShown = true;
             showTab(item.getItemId());
             return true;
@@ -108,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         // Tapping the current tab again returns to that tab's first screen.
         nav.setOnItemReselectedListener(item -> clearBackStack());
 
-        if (savedInstanceState == null) {
+        if (!sameAccount) {
             int start = Repo.role == Repo.ROLE_ADMIN ? R.id.nav_a_dashboard
                     : Repo.role == Repo.ROLE_TUTOR ? R.id.nav_t_home : R.id.nav_learn;
             nav.setSelectedItemId(start);
@@ -118,65 +97,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        Repo.save();
-        super.onPause();
-    }
-
-    /** Saves the account, clears it from memory and returns to Login. */
-    public void signOut() {
-        Repo.signOut();
-        Intent i = new Intent(this, LoginActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(i);
-        finish();
-    }
-
     /**
-     * Status-bar area colouring for the screen that just resumed:
-     *  - DarkScreen  -> whole window dark, light icons
-     *  - StatusTint  -> only the status-bar strip gets the screen's colour (blue Home and Path headers)
-     *  - otherwise   -> the normal light/dark app background
+     * Status-bar area colouring:
+     *  - DarkScreen   -> whole window dark, light icons
+     *  - StatusTint   -> only the status-bar strip gets that colour (blue home/path, white lesson)
+     *  - everything else -> normal light/dark app background
      */
     private void setChrome(Fragment f) {
-        if (f.getId() != R.id.nav_host) return; // only the screens shown in the shell
-        boolean night = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
-                == Configuration.UI_MODE_NIGHT_YES;
-        boolean dark = f instanceof DarkScreen;
-        navDivider.setVisibility(dark ? View.GONE : View.VISIBLE);
-        int barColor;
-        boolean lightBar; // true = dark icons on a light status bar
-        if (dark) {
+        boolean night = (getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        boolean lightIcons;
+        navDivider.setVisibility(f instanceof DarkScreen ? View.GONE : View.VISIBLE);
+        if (f instanceof DarkScreen) {
             tintColor = 0;
-            barColor = getColor(R.color.dark_bg);
-            root.setBackgroundColor(barColor);
-            lightBar = false;
+            root.setBackgroundColor(getColor(R.color.dark_bg));
+            lightIcons = false;
         } else if (f instanceof StatusTint) {
             tintColor = getColor(((StatusTint) f).statusColor());
-            barColor = tintColor;
             paintStatusArea(tintColor);
-            lightBar = ColorUtils.calculateLuminance(tintColor) > 0.5;
+            lightIcons = ColorUtils.calculateLuminance(tintColor) > 0.5;
         } else {
             tintColor = 0;
-            barColor = getColor(R.color.background);
-            root.setBackgroundColor(barColor);
-            lightBar = !night;
+            root.setBackgroundColor(getColor(R.color.background));
+            lightIcons = !night;
         }
-        setLegacyStatusBarColor(barColor);
-        WindowCompat.getInsetsController(getWindow(), root).setAppearanceLightStatusBars(lightBar);
+        WindowCompat.getInsetsController(getWindow(), root).setAppearanceLightStatusBars(lightIcons);
     }
 
-    /**
-     * Android 14 and older do not draw this window behind the status bar, so the strip painted by
-     * paintStatusArea is not seen there: colour the bar itself, or light icons would sit on a light bar.
-     */
-    @SuppressWarnings("deprecation")
-    private void setLegacyStatusBarColor(int color) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) getWindow().setStatusBarColor(color);
-    }
-
-    /** Surface everywhere, with the status-bar strip (the top inset) in the given colour. */
     private void paintStatusArea(int color) {
         LayerDrawable ld = new LayerDrawable(new Drawable[]{
                 new ColorDrawable(getColor(R.color.surface)), new ColorDrawable(color)});
@@ -186,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showTab(int itemId) {
+        if (!authorize(areaForTab(itemId))) return;
         clearBackStack();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.nav_host, fragmentFor(itemId))
@@ -198,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
     /** Push a sub-screen on top of the current tab. */
     public void open(Fragment f) {
+        if (!authorizeFragment(f)) return;
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.nav_host, f)
                 .addToBackStack(null)
@@ -206,19 +156,109 @@ public class MainActivity extends AppCompatActivity {
 
     /** Show the confirmation screen; Back then returns to the tab's first screen. */
     public void showConfirmation(Fragment f) {
+        if (!authorizeFragment(f)) return;
         FragmentManager fm = getSupportFragmentManager();
         fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         fm.beginTransaction().replace(R.id.nav_host, f).addToBackStack(null).commit();
     }
 
     public void selectTab(int menuId) {
+        if (!authorize(areaForTab(menuId))) return;
         nav.setSelectedItemId(menuId);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (isFinishing() || accounts == null) return;
+        AccountStore.Account account = accounts.current();
+        if (account == null || !account.id.equals(signedInId) || account.role != signedInRole) {
+            Repo.clearIdentity();
+            redirectToLogin();
+        } else Repo.activateAccount(account);
+    }
+
+    @Override protected void onSaveInstanceState(@NonNull Bundle state) {
+        state.putString("account_id", signedInId);
+        state.putBundle("practice", PracticeSnapshot.capture());
+        super.onSaveInstanceState(state);
+    }
+
+    @Override protected void onStop() {
+        Repo.persist();
+        super.onStop();
+    }
+
+    private void redirectToLogin() {
+        startActivity(new Intent(this, LoginActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        finish();
+    }
+
+    private boolean authorize(AccessPolicy.Area area) {
+        AccountStore.Account account = accounts.current();
+        if (account == null || !account.id.equals(signedInId) || account.role != signedInRole) {
+            Repo.clearIdentity();
+            redirectToLogin();
+            return false;
+        }
+        Repo.activateAccount(account);
+        if (!AccessPolicy.allows(account.role, area)) {
+            Toast.makeText(this, R.string.account_access_denied, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private AccessPolicy.Area areaForTab(int id) {
+        if (id == R.id.nav_profile) return AccessPolicy.Area.SHARED;
+        if (id == R.id.nav_learn || id == R.id.nav_path || id == R.id.nav_practice || id == R.id.nav_tutors)
+            return AccessPolicy.Area.LEARNER;
+        if (id == R.id.nav_t_home || id == R.id.nav_t_sessions || id == R.id.nav_t_lessons || id == R.id.nav_t_payouts)
+            return AccessPolicy.Area.TUTOR;
+        if (id == R.id.nav_a_dashboard || id == R.id.nav_a_listings || id == R.id.nav_a_users || id == R.id.nav_a_payouts)
+            return AccessPolicy.Area.ADMIN;
+        return null;
+    }
+
+    private boolean authorizeFragment(Fragment fragment) {
+        AccessPolicy.Area area;
+        if (fragment instanceof AdminDashboardFragment || fragment instanceof AdminListingsFragment
+                || fragment instanceof AdminUsersFragment || fragment instanceof AdminPayoutsFragment) area = AccessPolicy.Area.ADMIN;
+        else if (fragment instanceof TutorHomeFragment || fragment instanceof TutorSessionsFragment
+                || fragment instanceof MyListingsFragment || fragment instanceof LessonFormFragment
+                || fragment instanceof MediaFragment || fragment instanceof PayoutsFragment) area = AccessPolicy.Area.TUTOR;
+        else if (fragment instanceof CameraCheckFragment || fragment instanceof LiveClassroomFragment) area = AccessPolicy.Area.SESSION;
+        else if (fragment instanceof ProfileFragment || fragment instanceof NotificationsFragment) area = AccessPolicy.Area.SHARED;
+        else if (fragment instanceof LearnFragment || fragment instanceof PathFragment || fragment instanceof PracticeFragment
+                || fragment instanceof PracticeSummaryFragment || fragment instanceof SignLessonFragment
+                || fragment instanceof CameraUnavailableFragment || fragment instanceof TutorsFragment
+                || fragment instanceof BookingsFragment || fragment instanceof LessonDetailFragment
+                || fragment instanceof FilterFragment || fragment instanceof ScheduleFragment
+                || fragment instanceof ReviewFragment || fragment instanceof ConfirmedFragment) area = AccessPolicy.Area.LEARNER;
+        else area = null;
+        if (!authorize(area)) return false;
+        if (fragment instanceof LessonFormFragment || fragment instanceof MediaFragment) {
+            int id = fragment.getArguments() == null ? -1 : fragment.getArguments().getInt("id", -1);
+            if ((id >= 0 && Repo.ownedLesson(id) == null) || (id < 0 && Repo.draft != null && !Repo.ownsLesson(Repo.draft))) {
+                Toast.makeText(this, R.string.account_access_denied, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }
+        if (fragment instanceof LiveClassroomFragment) {
+            Bundle args = fragment.getArguments();
+            String reference = args == null ? null : args.getString("ref");
+            if (!Repo.canJoinSession(reference, System.currentTimeMillis())) {
+                Toast.makeText(this, R.string.session_not_open, Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        return true;
     }
 
     private Fragment fragmentFor(int id) {
         // Shared
         if (id == R.id.nav_profile) return new ProfileFragment();
-        // Learner (Bookings opens from Profile, see ProfileFragment)
+        // Learner
         if (id == R.id.nav_path) return new PathFragment();
         if (id == R.id.nav_practice) return new PracticeFragment();
         if (id == R.id.nav_tutors) return new TutorsFragment();

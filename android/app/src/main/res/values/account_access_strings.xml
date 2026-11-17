@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_password_requirement">Use at least 8 characters.</string>
+    <string name="account_login_failed">Email or password is incorrect, or the account is suspended.</string>
+    <string name="account_email_exists">An account already uses this email. Log in with its existing role.</string>
+    <string name="account_registration_failed">Could not create this account. Check your details and try again.</string>
+    <string name="account_access_denied">Your account does not have access to this screen.</string>
+    <string name="session_not_open">You can join only during the scheduled session, using the booked student or tutor account.</string>
+    <string name="session_ready">Your session is open. You can join now.</string>
+    <string name="session_schedule_note">Times are in Philippine time (PHT). Joining opens at the scheduled start time.</string>
+    <string name="session_slot_unavailable">This slot is no longer available. Please choose another schedule.</string>
+    <string name="session_no_slots">No available times today. Choose another day.</string>
+    <string name="session_unavailable_title">Session unavailable</string>
+    <string name="data_unavailable_title">Details unavailable</string>
+    <string name="booking_details_unavailable">Booking details are unavailable. Return to your bookings to check the session.</string>
+    <string name="listing_details_unavailable">This lesson is unavailable or does not belong to your account.</string>
+</resources>

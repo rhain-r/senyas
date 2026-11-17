@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="local_save_failed">Could not save your changes. Please try again.</string>
+    <string name="listing_title_length">Use at most 200 characters for the title.</string>
+    <string name="listing_description_length">Use at most 10,000 characters for the description.</string>
+    <string name="listing_city_length">Use at most 200 characters for the city.</string>
+    <string name="listing_details_required">Complete the lesson title, category, duration and rate before publishing.</string>
+    <string name="session_cancelled_label">Cancelled</string>
+    <string name="session_cancelled_note">This session was cancelled.</string>
+</resources>

@@ -116,12 +116,14 @@ public class TutorsFragment extends Fragment {
         } else {
             refresh();
         }
+        refreshFromCloud();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         if (Repo.loadedOnce) { syncChips(); refresh(); }
+        refreshFromCloud();
     }
 
     @Override
@@ -165,6 +167,13 @@ public class TutorsFragment extends Fragment {
             tvCount.setText(getResources().getQuantityString(R.plurals.lessons_nearby, r.size(), r.size()));
             show(State.LIST);
         }
+    }
+
+    private void refreshFromCloud() {
+        if (!CloudRuntime.enabled()) return;
+        CloudData.refresh().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && isAdded() && adapter != null) refresh();
+        });
     }
 
     private void show(State s) {

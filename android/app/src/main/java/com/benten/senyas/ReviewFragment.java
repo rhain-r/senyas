@@ -34,37 +34,21 @@ public class ReviewFragment extends Fragment {
     private ScrollView scroll;
     private int kind; // 0 GCash, 1 Maya, 2 Card
 
-    /** The chosen slot travels in the arguments, so the screen survives the app being closed. */
-    public static ReviewFragment newInstance(int lessonId, String day, String isoDate, int startMin, int duration,
-                                             int price) {
-        ReviewFragment f = new ReviewFragment();
-        Bundle a = new Bundle();
-        a.putInt("id", lessonId);
-        a.putString("day", day);
-        a.putString("date", isoDate);
-        a.putInt("start", startMin);
-        a.putInt("duration", duration);
-        a.putInt("price", price);
-        f.setArguments(a);
-        return f;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle b) {
-        return inflater.inflate(R.layout.fragment_review, container, false);
+        return inflater.inflate(available() ? R.layout.fragment_review : R.layout.fragment_session_blocked, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
-        Ui.bindTopBar(v, getString(R.string.title_review_booking), requireActivity());
-        if (!restoreDraft()) {
-            // The lesson is gone: back to the schedule once the screen is restored.
-            v.post(() -> {
-                if (isAdded()) getParentFragmentManager().popBackStack();
-            });
+        if (!available()) {
+            ((TextView) v.findViewById(R.id.blocked_title)).setText(R.string.data_unavailable_title);
+            ((TextView) v.findViewById(R.id.session_blocked_message)).setText(R.string.booking_details_unavailable);
+            v.findViewById(R.id.btn_back).setOnClickListener(x -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
             return;
         }
+        Ui.bindTopBar(v, getString(R.string.title_review_booking), requireActivity());
         Lesson l = Repo.draftLesson;
 
         ((TextView) v.findViewById(R.id.tv_title)).setText(l.title);
@@ -137,25 +121,19 @@ public class ReviewFragment extends Fragment {
             } else {
                 Repo.draftPayment = kind == 1 ? "Maya" : "GCash";
             }
-            Repo.Booking bk = Repo.confirmDraft(); // TODO (Firebase batch): write booking to Firestore + start payment
-            if (bk == null) return; // already booked by an earlier tap
-            ((MainActivity) requireActivity()).showConfirmation(ConfirmedFragment.newInstance(bk.reference));
+            try { Repo.confirmDraft(); }
+            catch (IllegalStateException | SecurityException unavailable) {
+                android.widget.Toast.makeText(requireContext(), unavailable instanceof Repo.StorageException
+                                ? R.string.local_save_failed : R.string.session_slot_unavailable,
+                        android.widget.Toast.LENGTH_LONG).show();
+                return;
+            }
+            ((MainActivity) requireActivity()).showConfirmation(new ConfirmedFragment());
         });
     }
 
-    /** Uses the draft in memory, or rebuilds it from the arguments after the app was closed. */
-    private boolean restoreDraft() {
-        if (Repo.draftLesson != null) return true;
-        Bundle a = getArguments();
-        Lesson l = a == null ? null : Repo.find(a.getInt("id", -1));
-        if (l == null) return false;
-        Repo.draftLesson = l;
-        Repo.draftDay = a.getString("day", Repo.draftDay);
-        Repo.draftDate = a.getString("date", Repo.draftDate);
-        Repo.draftStartMin = a.getInt("start", Repo.draftStartMin);
-        Repo.draftDuration = a.getInt("duration", Repo.draftDuration);
-        Repo.draftPrice = a.getInt("price", Repo.draftPrice);
-        return true;
+    private boolean available() {
+        return Repo.isBookable(Repo.draftLesson) && Repo.draftStartAtMillis > 0;
     }
 
     private void updatePayUi(boolean scrollDown) {

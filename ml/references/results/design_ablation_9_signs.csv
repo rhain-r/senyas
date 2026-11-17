@@ -1,3 +1,0 @@
-design,signs,K,P,N,H,E,R,note
-without direction (5 parameters),9,1.25,0.86,0.02,0.0,0.84,0.36,earlier run; reported to 2 decimals
-with direction (DIR_FLOOR 0.35; DIR_MIN_G 0.15),9,1.25,0.844,0.020,0.0,0.833,0.311,shipped design

@@ -29,7 +29,7 @@
     <color name="paper_grey">#E6E8EE</color>
     <color name="senyas_icon_bg">#1E3AB8</color>
 
-    <!-- Redesign (Duolingo-style): darker "edge" shades under the chunky 3D buttons, cards and path nodes -->
+    <!-- NEW: Duolingo-style "3D" button / node edges (darker shade of the same brand colours) -->
     <color name="blue_edge">#152B8A</color>
     <color name="yellow_edge">#E0A000</color>
     <color name="success_green">#1E8E4E</color>

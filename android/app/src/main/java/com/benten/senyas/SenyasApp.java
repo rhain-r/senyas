@@ -14,6 +14,9 @@ public class SenyasApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CameraDiagnostics.initialize(this);
+        CloudRuntime.initialize(this);
+        Repo.initialize(this);
         int mode = getSharedPreferences(PREFS, MODE_PRIVATE)
                 .getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         AppCompatDelegate.setDefaultNightMode(mode);

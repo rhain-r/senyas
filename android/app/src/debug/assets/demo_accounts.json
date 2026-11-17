@@ -1,0 +1,29 @@
+[
+  {
+    "role": 1,
+    "salt": "WL5a7hkW0L2PUxU/Etubvg==",
+    "name": "Ana Reyes",
+    "hash": "efv/fXgZrvN5S9Yq3JQG1PyVlLwJW4RGRbm8/h2htao=",
+    "active": true,
+    "email": "student@senyas.local",
+    "iterations": 210000
+  },
+  {
+    "role": 2,
+    "salt": "vF6ziY3eorYVTO7s71xFig==",
+    "name": "Maria Santos",
+    "hash": "LisQftDBPhT+H0cOEwmloJgkpprjrSwRWWk6mCzZTxw=",
+    "active": true,
+    "email": "tutor@senyas.local",
+    "iterations": 210000
+  },
+  {
+    "role": 3,
+    "salt": "gjvcEkknxvRsyvRrtlY30w==",
+    "name": "Senyas Administrator",
+    "hash": "3kYFMhy1CunOwiApxDlNdw3hbYBRWzcq8K9PUyc/irc=",
+    "active": true,
+    "email": "admin@senyas.local",
+    "iterations": 210000
+  }
+]

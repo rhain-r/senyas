@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_camera_diagnostics">Ibahagi ang diagnostic ng camera</string>
+    <string name="camera_diagnostics_description">Kapag biglang nagsara ang Senyas, buksan muli at ibahagi ang ulat na ito para masuri ang problema. Kasama rito ang detalye ng device, mga hakbang ng camera, at available na system crash trace. Nasa device mo lang ito hanggang piliin mong ibahagi. Hindi idinadagdag ng Senyas ang mga larawan ng camera o tala ng account sa ulat.</string>
+    <string name="diagnostics_export_failed">Hindi ma-export ang diagnostic na ulat. Subukan muli.</string>
+</resources>

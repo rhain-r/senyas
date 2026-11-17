@@ -1,0 +1,4 @@
+<resources>
+    <string name="admin_login_entry">Mag-sign in bilang administrator</string>
+    <string name="admin_login_help">Gamitin ang itinalagang email at password ng administrator. Ang iyong account ang nagtatakda ng access sa console.</string>
+</resources>

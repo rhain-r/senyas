@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.ChipGroup;
 
-/** Listings the signed-in tutor published; a new tutor starts with none. */
 public class MyListingsFragment extends Fragment {
 
     private LinearLayout list;
@@ -37,14 +36,20 @@ public class MyListingsFragment extends Fragment {
             ((MainActivity) requireActivity()).open(LessonFormFragment.newInstance(-1));
         });
         render();
+        refreshFromCloud();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (list == null) return;
-        Repo.save(); // keeps edits made on the media screen
-        render();
+        if (list != null) { render(); refreshFromCloud(); }
+    }
+
+    private void refreshFromCloud() {
+        if (!CloudRuntime.enabled()) return;
+        CloudData.refresh().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && isAdded() && list != null) render();
+        });
     }
 
     private void render() {

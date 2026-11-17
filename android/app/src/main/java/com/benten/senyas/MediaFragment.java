@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,27 +19,20 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
-
-import java.time.DayOfWeek;
-import java.time.format.TextStyle;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-/**
- * Step 2 of New lesson (publish), or media/availability editing (id = lesson id). The tutor sets
- * the weekdays they teach and the session start times; learners book only from these.
- */
+/** Step 2 of New lesson (publish), or media/availability editing (id = lesson id). */
 public class MediaFragment extends Fragment {
 
     private boolean editing, hasCover, hasPreview;
     private Lesson lesson;
-    private TextView tvCover, tvPreview, tvDaysError, tvTimesError;
-    private ChipGroup cgTimes;
-    private int days;
-    private final List<Integer> times = new ArrayList<>();
+    private TextView tvCover, tvPreview;
+    private final ArrayList<String> selectedDays = new ArrayList<>();
+    private ChipGroup selectedDateChips;
+    private TextInputEditText dateField;
 
     public static MediaFragment newInstance(int lessonId) {
         MediaFragment f = new MediaFragment();
@@ -50,47 +45,52 @@ public class MediaFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle b) {
-        return inflater.inflate(R.layout.fragment_media, container, false);
+        int id = requireArguments().getInt("id", -1);
+        boolean allowed = id < 0 ? (Repo.accountRole() == Repo.ROLE_TUTOR && (Repo.draft == null || Repo.ownsLesson(Repo.draft)))
+                : Repo.ownedLesson(id) != null;
+        return inflater.inflate(allowed ? R.layout.fragment_media : R.layout.fragment_session_blocked, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
         int id = requireArguments().getInt("id", -1);
         editing = id != -1;
-        if (!editing && Repo.draft == null) {
-            // Step 1 was lost when the app was closed: go back to it instead of starting blank.
-            v.post(() -> {
-                if (isAdded()) backToStepOne();
-            });
+        if (!editing && Repo.draft == null && Repo.accountRole() == Repo.ROLE_TUTOR) Repo.startDraft();
+        lesson = editing ? Repo.ownedLesson(id) : Repo.draft;
+        if (!Repo.ownsLesson(lesson)) {
+            ((TextView) v.findViewById(R.id.blocked_title)).setText(R.string.data_unavailable_title);
+            ((TextView) v.findViewById(R.id.session_blocked_message)).setText(R.string.listing_details_unavailable);
+            v.findViewById(R.id.btn_back).setOnClickListener(x -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
             return;
         }
-        lesson = editing ? Repo.byId(id) : Repo.draft;
-        hasCover = lesson.hasCover;
-        hasPreview = lesson.hasPreview;
+        hasCover = b == null ? lesson.hasCover : b.getBoolean("has_cover", lesson.hasCover);
+        hasPreview = b == null ? lesson.hasPreview : b.getBoolean("has_preview", lesson.hasPreview);
 
         Ui.bindTopBar(v, getString(R.string.title_media), requireActivity());
         tvCover = v.findViewById(R.id.tv_cover_state);
         tvPreview = v.findViewById(R.id.tv_preview_state);
         TextInputLayout tilCity = v.findViewById(R.id.til_city);
+        TextInputLayout tilSlots = v.findViewById(R.id.til_slots);
+        TextInputLayout tilDay = v.findViewById(R.id.til_day);
         TextInputEditText etCity = v.findViewById(R.id.et_city);
+        TextInputEditText etSlots = v.findViewById(R.id.et_slots);
+        TextInputEditText actvDay = v.findViewById(R.id.actv_day);
+        dateField = actvDay;
+        selectedDateChips = v.findViewById(R.id.cg_selected_days);
+        selectedDays.clear();
+        ArrayList<String> restoredDays = b == null ? null : b.getStringArrayList("selected_days");
+        selectedDays.addAll(restoredDays == null ? LessonAvailability.dateLabels(lesson) : restoredDays);
         MaterialButton publish = v.findViewById(R.id.btn_publish);
-        tvDaysError = v.findViewById(R.id.tv_days_error);
-        tvTimesError = v.findViewById(R.id.tv_times_error);
-        cgTimes = v.findViewById(R.id.cg_times);
 
-        if (b == null) etCity.setText(lesson.city);
-        etCity.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) { }
-            @Override public void onTextChanged(CharSequence s, int st, int bf, int c) { tilCity.setError(null); }
-            @Override public void afterTextChanged(android.text.Editable s) { }
-        });
-        days = b != null ? b.getInt("days", lesson.days) : lesson.days;
-        times.clear();
-        if (b != null && b.getIntegerArrayList("times") != null) times.addAll(b.getIntegerArrayList("times"));
-        else times.addAll(lesson.times);
-        bindDays(v.findViewById(R.id.cg_days));
-        showTimes();
-        v.findViewById(R.id.btn_add_time).setOnClickListener(x -> pickTime());
+        etCity.setText(lesson.city);
+        etSlots.setText(lesson.slots);
+        showSelectedDays();
+        actvDay.setKeyListener(null);
+        etSlots.setKeyListener(null);
+        actvDay.setOnClickListener(x -> chooseDay(actvDay, tilDay));
+        tilDay.setEndIconOnClickListener(x -> chooseDay(actvDay, tilDay));
+        etSlots.setOnClickListener(x -> chooseSlots(etSlots, tilSlots));
+        tilSlots.setEndIconOnClickListener(x -> chooseSlots(etSlots, tilSlots));
         updateTiles();
 
         v.findViewById(R.id.btn_add_media).setOnClickListener(x -> new MaterialAlertDialogBuilder(requireContext())
@@ -108,117 +108,144 @@ public class MediaFragment extends Fragment {
 
         publish.setText(editing ? R.string.publish_save : R.string.publish_lesson);
         publish.setOnClickListener(x -> {
+            if (!Repo.ownsLesson(lesson)) return;
             tilCity.setError(null);
-            String city = etCity.getText() == null ? "" : etCity.getText().toString().trim().replaceAll("\\s+", " ");
-            boolean cityOk = InputRules.isCity(city);
-            if (!cityOk) tilCity.setError(getString(city.isEmpty() ? R.string.err_city : R.string.err_city_format));
-            tvDaysError.setVisibility(days == 0 ? View.VISIBLE : View.GONE);
-            tvTimesError.setVisibility(times.isEmpty() ? View.VISIBLE : View.GONE);
-            if (!cityOk || days == 0 || times.isEmpty()) {
-                // On a short (landscape) screen the problem can be out of view: scroll it in.
-                View problem = !cityOk ? etCity : days == 0 ? tvDaysError : tvTimesError;
-                problem.getParent().requestChildFocus(problem, problem);
-                if (!cityOk) etCity.requestFocus();
-                return;
-            }
+            tilSlots.setError(null);
+            tilDay.setError(null);
+            String city = etCity.getText() == null ? "" : etCity.getText().toString().trim();
+            String slots = etSlots.getText() == null ? "" : etSlots.getText().toString().trim();
+            boolean ok = true;
+            if (city.isEmpty()) { tilCity.setError(getString(R.string.err_city)); ok = false; }
+            if (city.length() > 200) { tilCity.setError(getString(R.string.listing_city_length)); ok = false; }
+            LessonAvailability.Error availability = LessonAvailability.validate(selectedDays, slots, lesson.duration, System.currentTimeMillis());
+            if (availability == LessonAvailability.Error.DATE) { tilDay.setError(getString(R.string.availability_date_error)); ok = false; }
+            if (availability == LessonAvailability.Error.TIME) { tilSlots.setError(getString(R.string.availability_time_error)); ok = false; }
+            if (availability == LessonAvailability.Error.PAST) { tilSlots.setError(getString(R.string.availability_past_error)); ok = false; }
+            if (!ok) return;
 
+            String oldCity = lesson.city, oldSlots = lesson.slots, oldDay = lesson.day;
+            List<String> oldDays = new ArrayList<>(lesson.days);
+            boolean oldCover = lesson.hasCover, oldPreview = lesson.hasPreview;
+            int oldPreviewSeconds = lesson.previewSeconds;
             lesson.city = city;
-            lesson.days = days;
-            lesson.times = Availability.normalize(times);
+            lesson.slots = LessonAvailability.formatSlots(LessonAvailability.parseSlots(slots));
+            LessonAvailability.setDays(lesson, selectedDays);
             lesson.hasCover = hasCover;
             lesson.hasPreview = hasPreview;
+            if (CloudRuntime.enabled()) {
+                lesson.previewSeconds = hasPreview ? Math.max(lesson.previewSeconds, 30) : 0;
+                CloudUi.run(this, publish, CloudData.saveLesson(lesson, !editing), confirmed -> {
+                    Toast.makeText(requireContext(), editing ? R.string.toast_changes_saved : R.string.toast_published,
+                            Toast.LENGTH_SHORT).show();
+                    if (editing) requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                    else ((MainActivity) requireActivity()).selectTab(R.id.nav_t_lessons);
+                });
+                return;
+            }
             if (editing) {
                 lesson.previewSeconds = hasPreview ? Math.max(lesson.previewSeconds, 30) : 0;
+                if (!Repo.persist()) {
+                    lesson.city = oldCity; lesson.slots = oldSlots; lesson.day = oldDay;
+                    lesson.days.clear(); lesson.days.addAll(oldDays);
+                    lesson.hasCover = oldCover; lesson.hasPreview = oldPreview; lesson.previewSeconds = oldPreviewSeconds;
+                    Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Toast.makeText(requireContext(), R.string.toast_changes_saved, Toast.LENGTH_SHORT).show();
                 requireActivity().getOnBackPressedDispatcher().onBackPressed();
-            } else if (Repo.publishDraft() == null) { // TODO (Firebase batch): write the listing to Firestore
-                backToStepOne(); // no title or rate: never publish a blank listing
             } else {
+                try { Repo.publishDraft(); }
+                catch (IllegalStateException | SecurityException invalid) {
+                    Toast.makeText(requireContext(), invalid instanceof Repo.StorageException
+                            ? R.string.local_save_failed : R.string.listing_details_required, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Toast.makeText(requireContext(), R.string.toast_published, Toast.LENGTH_SHORT).show();
                 ((MainActivity) requireActivity()).selectTab(R.id.nav_t_lessons);
             }
         });
     }
 
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle out) {
-        super.onSaveInstanceState(out);
-        out.putInt("days", days);
-        out.putIntegerArrayList("times", new ArrayList<>(times));
+    @Override public void onSaveInstanceState(@NonNull Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putBoolean("has_cover", hasCover);
+        state.putBoolean("has_preview", hasPreview);
+        state.putStringArrayList("selected_days", new ArrayList<>(selectedDays));
     }
 
-    /** Monday to Sunday chips; each toggles that weekday. */
-    private void bindDays(ChipGroup group) {
-        Locale locale = getResources().getConfiguration().getLocales().get(0);
-        LayoutInflater inf = LayoutInflater.from(requireContext());
-        for (DayOfWeek d : DayOfWeek.values()) {
-            Chip c = (Chip) inf.inflate(R.layout.item_choice_chip, group, false);
-            c.setId(View.generateViewId());
-            c.setText(d.getDisplayName(TextStyle.SHORT, locale));
-            c.setChecked((days & Availability.bit(d)) != 0);
-            c.setOnCheckedChangeListener((chip, on) -> {
-                days = on ? days | Availability.bit(d) : days & ~Availability.bit(d);
-                if (days != 0) tvDaysError.setVisibility(View.GONE);
-            });
-            group.addView(c);
-        }
-    }
-
-    /** The chosen start times as removable chips, earliest first. */
-    private void showTimes() {
-        cgTimes.removeAllViews();
-        List<Integer> sorted = Availability.normalize(times);
-        times.clear();
-        times.addAll(sorted);
-        LayoutInflater inf = LayoutInflater.from(requireContext());
-        for (int t : times) {
-            Chip c = (Chip) inf.inflate(R.layout.item_choice_chip, cgTimes, false);
-            c.setId(View.generateViewId());
-            c.setText(Ui.clock(t, true));
-            c.setCheckable(false);
-            c.setCloseIconVisible(true);
-            c.setCloseIconContentDescription(getString(R.string.remove_time, Ui.clock(t, true)));
-            c.setOnCloseIconClickListener(x -> {
-                times.remove(Integer.valueOf(t));
-                showTimes();
-            });
-            cgTimes.addView(c);
-        }
-    }
-
-    /** A clock picker, so a time slot can only ever be a real time. */
-    private void pickTime() {
-        if (times.size() >= Availability.MAX_TIMES) {
-            Toast.makeText(requireContext(), getString(R.string.err_time_max, Availability.MAX_TIMES),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        int start = times.isEmpty() ? 15 * 60 : Math.min(times.get(times.size() - 1) + 60, Availability.LATEST);
-        MaterialTimePicker picker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(start / 60)
-                .setMinute(start % 60)
-                .setTitleText(R.string.time_picker_title)
-                .build();
-        picker.addOnPositiveButtonClickListener(x -> {
-            int t = picker.getHour() * 60 + picker.getMinute();
-            if (t < Availability.EARLIEST || t > Availability.LATEST) {
-                Toast.makeText(requireContext(), R.string.err_time_range, Toast.LENGTH_LONG).show();
-            } else if (times.contains(t)) {
-                Toast.makeText(requireContext(), getString(R.string.err_time_duplicate, Ui.clock(t, true)),
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                times.add(t);
-                tvTimesError.setVisibility(View.GONE);
-                showTimes();
+    private void chooseDay(TextInputEditText field, TextInputLayout layout) {
+        LocalDate today = LocalDate.now(SessionTime.ZONE);
+        LocalDate selected = LessonAvailability.parseDay(field.getText() == null ? "" : field.getText().toString());
+        if (selected == null || selected.isBefore(today)) selected = today;
+        DatePickerDialog picker = new DatePickerDialog(requireContext(), (view, year, month, day) -> {
+            String label = LessonAvailability.formatDay(LocalDate.of(year, month + 1, day));
+            if (!selectedDays.contains(label)) {
+                if (selectedDays.size() >= LessonAvailability.MAX_DAYS) {
+                    layout.setError(getString(R.string.availability_dates_limit));
+                    return;
+                }
+                selectedDays.add(label);
+                List<LocalDate> dates = LessonAvailability.parseDays(selectedDays);
+                selectedDays.clear();
+                for (LocalDate date : dates) selectedDays.add(LessonAvailability.formatDay(date));
             }
-        });
-        picker.show(getParentFragmentManager(), "time");
+            showSelectedDays();
+            field.setText(label);
+            layout.setError(null);
+        }, selected.getYear(), selected.getMonthValue() - 1, selected.getDayOfMonth());
+        picker.getDatePicker().setMinDate(today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        picker.show();
     }
 
-    private void backToStepOne() {
-        Toast.makeText(requireContext(), R.string.toast_draft_incomplete, Toast.LENGTH_LONG).show();
-        getParentFragmentManager().popBackStack();
+    private void showSelectedDays() {
+        selectedDateChips.removeAllViews();
+        dateField.setText(selectedDays.isEmpty() ? "" : selectedDays.get(selectedDays.size() - 1));
+        for (String label : new ArrayList<>(selectedDays)) {
+            Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_availability_date, selectedDateChips, false);
+            chip.setId(View.generateViewId());
+            chip.setText(label);
+            chip.setCheckable(false);
+            chip.setSaveEnabled(false);
+            chip.setCloseIconResource(R.drawable.ic_close);
+            chip.setCloseIconVisible(true);
+            chip.setCloseIconContentDescription(getString(R.string.availability_remove_date, label));
+            chip.setOnCloseIconClickListener(view -> {
+                selectedDays.remove(label);
+                showSelectedDays();
+            });
+            selectedDateChips.addView(chip);
+        }
+    }
+
+    @Override public void onDestroyView() {
+        selectedDateChips = null;
+        dateField = null;
+        super.onDestroyView();
+    }
+
+    private void chooseSlots(TextInputEditText field, TextInputLayout layout) {
+        List<Integer> times = new ArrayList<>(LessonAvailability.parseSlots(field.getText() == null ? "" : field.getText().toString()));
+        if (times.isEmpty()) { addTime(field, layout, times); return; }
+        String[] labels = new String[times.size()];
+        for (int index = 0; index < times.size(); index++) labels[index] = getString(R.string.availability_remove_time, Ui.clock(times.get(index), true));
+        new MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.time_slots_pht)
+                .setItems(labels, (dialog, which) -> {
+                    times.remove(which);
+                    field.setText(LessonAvailability.formatSlots(times));
+                    layout.setError(null);
+                })
+                .setPositiveButton(R.string.availability_add_time, (dialog, which) -> addTime(field, layout, times))
+                .setNegativeButton(android.R.string.cancel, null).show();
+    }
+
+    private void addTime(TextInputEditText field, TextInputLayout layout, List<Integer> times) {
+        int initial = times.isEmpty() ? 15 * 60 : (times.get(times.size() - 1) + 60) % 1440;
+        new TimePickerDialog(requireContext(), (view, hour, minute) -> {
+            int value = hour * 60 + minute;
+            if (!times.contains(value)) times.add(value);
+            field.setText(LessonAvailability.formatSlots(times));
+            layout.setError(null);
+        }, initial / 60, initial % 60, false).show();
     }
 
     private void updateTiles() {

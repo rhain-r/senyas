@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_camera_diagnostics">Share camera diagnostics</string>
+    <string name="camera_diagnostics_description">After an unexpected exit, reopen Senyas and share this report for troubleshooting. It contains device details, camera stages and available system crash traces. It stays on your device until you choose to share. Senyas does not add camera photos or account records to the report.</string>
+    <string name="diagnostics_export_failed">Could not export the diagnostic report. Please try again.</string>
+</resources>

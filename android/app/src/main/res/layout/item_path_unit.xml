@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One unit of the learning path: a scenario's header and its sign nodes. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -32,19 +31,9 @@
             android:id="@+id/tv_unit_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:accessibilityHeading="true"
             android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tv_unit_meta"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:alpha="0.85"
-            android:textColor="@color/white"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <LinearLayout

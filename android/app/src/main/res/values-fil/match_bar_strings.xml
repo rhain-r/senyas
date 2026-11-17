@@ -1,0 +1,4 @@
+<resources>
+    <string name="match_pct_ungraded" formatted="false">—% tugma</string>
+    <string name="match_bar_ungraded_description">Wala pang marka ng pagtugma. Ipinapakita ng puting guhit ang layuning 85 porsiyento.</string>
+</resources>

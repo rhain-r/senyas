@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="availability_date_error">Choose a valid available date.</string>
+    <string name="availability_time_error">Choose valid start times. Each lesson must end by midnight.</string>
+    <string name="availability_past_error">Choose a future date and time in Philippine time.</string>
+    <string name="availability_add_time">Add time</string>
+    <string name="availability_remove_time">Remove %1$s</string>
+    <string name="availability_time_hint">Tap to add or remove start times in Philippine time.</string>
+    <string name="availability_dates_hint">Tap the calendar to add dates. Remove a date with ×. These times apply to every selected date.</string>
+    <string name="availability_remove_date">Remove %1$s</string>
+    <string name="availability_dates_limit">Select up to 100 available dates.</string>
+</resources>

@@ -13,8 +13,8 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- The bar and its divider share one container, which also takes the bottom system inset,
-         so the gesture area under the bar gets the bar's colour instead of the window's. -->
+    <!-- nav bar + its divider live in one container so the phone's bottom gesture area
+         gets the nav's background instead of the window background -->
     <LinearLayout
         android:id="@+id/nav_container"
         android:layout_width="match_parent"
@@ -22,26 +22,26 @@
         android:background="@color/surface"
         android:orientation="vertical">
 
-        <View
-            android:id="@+id/nav_divider"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/card_stroke" />
+    <View
+        android:id="@+id/nav_divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/card_stroke" />
 
-        <!-- Icons only, with a rounded outlined box around the active tab (titles stay for TalkBack). -->
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_nav"
-            android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:background="@color/surface"
-            app:elevation="0dp"
-            app:itemActiveIndicatorStyle="@style/Widget.Senyas.NavIndicator"
-            app:itemBackground="@drawable/nav_item_bg"
-            app:itemIconSize="28dp"
-            app:itemIconTint="@color/nav_icon_tint"
-            app:itemPaddingBottom="0dp"
-            app:itemPaddingTop="0dp"
-            app:labelVisibilityMode="unlabeled"
-            app:menu="@menu/bottom_nav_menu" />
+    <!-- Duolingo-style: icons only, rounded outlined box around the active tab -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="@color/surface"
+        app:elevation="0dp"
+        app:itemActiveIndicatorStyle="@style/Widget.Senyas.NavIndicator"
+        app:itemBackground="@drawable/nav_item_bg"
+        app:itemIconTint="@color/nav_icon_tint"
+        app:itemIconSize="28dp"
+        app:itemPaddingBottom="0dp"
+        app:itemPaddingTop="0dp"
+        app:labelVisibilityMode="unlabeled"
+        app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>
 </LinearLayout>

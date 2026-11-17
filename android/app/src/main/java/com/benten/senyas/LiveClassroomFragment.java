@@ -18,12 +18,14 @@ import androidx.fragment.app.Fragment;
 
 import java.util.Locale;
 
-/** Live classroom (UI only). Video streaming (60 fps) and shared drawing sync arrive in a later batch. */
+/** Classroom with a real local self-view. Remote calling and shared drawing still need a backend. */
 public class LiveClassroomFragment extends Fragment implements DarkScreen {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private int remaining = 42 * 60 + 18; // demo: session already running
-    private String tutor;
+    private int remaining;
+    private String reference;
+    private boolean admitted;
+    private String tutor = "Your tutor";
     private TextView tvSession;
     private LinearLayout chatList;
     private ScrollView chatScroll;
@@ -46,27 +48,35 @@ public class LiveClassroomFragment extends Fragment implements DarkScreen {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle b) {
-        return inflater.inflate(R.layout.fragment_live_classroom, container, false);
+        reference = getArguments() == null ? "" : getArguments().getString("ref", "");
+        admitted = Repo.canJoinSession(reference, System.currentTimeMillis());
+        if (!admitted) {
+            Fragment oldCamera = getChildFragmentManager().findFragmentById(R.id.classroom_camera);
+            if (oldCamera != null) getChildFragmentManager().beginTransaction().remove(oldCamera).commitNow();
+        }
+        return inflater.inflate(admitted ? R.layout.fragment_live_classroom : R.layout.fragment_session_blocked, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
-        String ref = requireArguments().getString("ref", "");
-        tutor = getString(R.string.your_tutor);
-        for (Repo.Booking bk : Repo.BOOKINGS) if (bk.reference.equals(ref)) tutor = bk.tutor;
-        String other = requireArguments().getString("other");
-        if (other != null) tutor = other;
+        if (!admitted) {
+            v.findViewById(R.id.btn_back).setOnClickListener(x -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+            return;
+        }
+        Repo.TutorSession session = Repo.sessionByReference(reference);
+        tutor = Repo.accountRole() == Repo.ROLE_TUTOR ? session.learner : session.tutor;
 
         tvSession = v.findViewById(R.id.tv_session);
+        if (getChildFragmentManager().findFragmentById(R.id.classroom_camera) == null) {
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.classroom_camera, CameraPreviewFragment.newInstance(false)).commit();
+        }
         chatList = v.findViewById(R.id.chat_list);
         chatScroll = v.findViewById(R.id.chat_scroll);
         View board = v.findViewById(R.id.board_card);
         View chat = v.findViewById(R.id.chat_card);
         WhiteboardView wb = v.findViewById(R.id.whiteboard);
         EditText et = v.findViewById(R.id.et_chat);
-
-        addMessage(getString(R.string.chat_tutor_hello, tutor.split(" ")[0]), false);
-        addMessage(getString(R.string.chat_you_ready), true);
 
         v.findViewById(R.id.btn_chat).setOnClickListener(x -> { board.setVisibility(View.GONE); chat.setVisibility(View.VISIBLE); });
         v.findViewById(R.id.btn_board).setOnClickListener(x -> { chat.setVisibility(View.GONE); board.setVisibility(View.VISIBLE); });
@@ -84,19 +94,34 @@ public class LiveClassroomFragment extends Fragment implements DarkScreen {
         v.findViewById(R.id.btn_leave).setOnClickListener(leave);
         v.findViewById(R.id.btn_back).setOnClickListener(leave);
 
-        tick();
     }
+
+    @Override public void onStart() { super.onStart(); if (admitted && tvSession != null) tick(); }
+    @Override public void onStop() { handler.removeCallbacksAndMessages(null); super.onStop(); }
 
     @Override
     public void onDestroyView() {
         handler.removeCallbacksAndMessages(null);
+        tvSession = null;
+        chatList = null;
+        chatScroll = null;
         super.onDestroyView();
     }
 
     private void tick() {
+        long now = System.currentTimeMillis();
+        if (!Repo.canJoinSession(reference, now)) {
+            tvSession.setText(R.string.session_not_open);
+            if (isResumed() && !getParentFragmentManager().isStateSaved()) {
+                admitted = false;
+                Toast.makeText(requireContext(), R.string.session_not_open, Toast.LENGTH_LONG).show();
+                requireActivity().getOnBackPressedDispatcher().onBackPressed();
+            } else handler.postDelayed(this::tick, 1000);
+            return;
+        }
+        remaining = (int) ((Repo.sessionByReference(reference).endAtMillis - now + 999) / 1000);
         tvSession.setText(getString(R.string.session_line, tutor, remaining / 60, remaining % 60));
         if (remaining > 0) {
-            remaining--;
             handler.postDelayed(this::tick, 1000);
         }
     }

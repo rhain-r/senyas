@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_check_title">Suriin ang camera</string>
+    <string name="camera_check_description">Tingnan ang camera mo bago ang session. Lokal lang ang preview na ito at hindi ka nito isinasali sa klase.</string>
+    <string name="classroom_remote_not_connected">Hindi konektado ang video ng kausap. Camera mo lang ang ipinapakita.</string>
+</resources>

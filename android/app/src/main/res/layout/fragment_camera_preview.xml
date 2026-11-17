@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_bg">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/your_camera_view" />
+
+    <com.benten.senyas.HandOverlayView
+        android:id="@+id/hand_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/camera_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_margin="12dp"
+        android:accessibilityLiveRegion="polite"
+        android:background="@drawable/bg_pill"
+        android:backgroundTint="@color/dark_surface"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="6dp"
+        android:text="@string/camera_starting"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/camera_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_margin="8dp"
+        android:minHeight="48dp"
+        android:text="@string/camera_allow"
+        android:visibility="gone" />
+</FrameLayout>

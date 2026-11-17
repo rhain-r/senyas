@@ -1,0 +1,4 @@
+<resources>
+    <string name="match_pct_ungraded" formatted="false">—% match</string>
+    <string name="match_bar_ungraded_description">Match score unavailable. The white marker shows the 85 percent target.</string>
+</resources>

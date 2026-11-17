@@ -21,6 +21,10 @@ public class TutorSessionsFragment extends Fragment {
     private LinearLayout list;
     private View emptyView;
     private TextView tvEmptyTitle, tvEmptyBody;
+    private final android.os.Handler refreshHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable refreshSessions = new Runnable() {
+        @Override public void run() { if (list != null && isResumed()) { render(); refreshHandler.postDelayed(this, 1000); } }
+    };
 
     @Nullable
     @Override
@@ -30,6 +34,8 @@ public class TutorSessionsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle b) {
+        v.findViewById(R.id.btn_camera_check).setOnClickListener(x ->
+                ((MainActivity) requireActivity()).open(new CameraCheckFragment()));
         ((TextView) v.findViewById(R.id.tv_page_title)).setText(R.string.title_sessions);
         v.findViewById(R.id.btn_find).setVisibility(View.GONE);
         list = v.findViewById(R.id.list);
@@ -50,15 +56,19 @@ public class TutorSessionsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (list != null) render();
+        refreshHandler.removeCallbacks(refreshSessions);
+        if (list != null) refreshHandler.post(refreshSessions);
     }
+
+    @Override public void onPause() { refreshHandler.removeCallbacks(refreshSessions); super.onPause(); }
+    @Override public void onDestroyView() { refreshHandler.removeCallbacks(refreshSessions); list = null; super.onDestroyView(); }
 
     private void render() {
         list.removeAllViews();
         LayoutInflater inf = LayoutInflater.from(requireContext());
         int count = 0;
-        for (Repo.TutorSession s : Repo.mySessions()) {
-            if (s.past == upcoming) continue;
+        for (Repo.TutorSession s : Repo.sessionsFor(Repo.ownerName)) {
+            if (Repo.isPast(s, System.currentTimeMillis()) == upcoming) continue;
             count++;
             View card = inf.inflate(R.layout.item_booking, list, false);
             bind(this, card, s);
@@ -75,7 +85,8 @@ public class TutorSessionsFragment extends Fragment {
     static void bind(Fragment f, View card, Repo.TutorSession s) {
         ChipGroup tags = card.findViewById(R.id.tags);
         tags.removeAllViews();
-        if (s.past) Ui.addTag(tags, f.getString(R.string.tag_completed_on, Ui.shortDay(s.dayLabel)), Ui.Tag.GREY);
+        if (s.cancelled) Ui.addTag(tags, f.getString(R.string.session_cancelled_label), Ui.Tag.GREY);
+        else if (Repo.isPast(s, System.currentTimeMillis())) Ui.addTag(tags, f.getString(R.string.tag_completed_on, Ui.shortDay(s.dayLabel)), Ui.Tag.GREY);
         else Ui.addTag(tags, f.getString(R.string.tag_booked_on, Ui.shortDay(s.dayLabel)), Ui.Tag.BLUE);
 
         ((TextView) card.findViewById(R.id.tv_title)).setText(s.title);
@@ -86,11 +97,13 @@ public class TutorSessionsFragment extends Fragment {
         View join = card.findViewById(R.id.btn_join);
         card.findViewById(R.id.btn_cancel).setVisibility(View.GONE);
         TextView note = card.findViewById(R.id.tv_note);
-        if (s.past) {
+        if (Repo.isPast(s, System.currentTimeMillis())) {
             join.setVisibility(View.GONE);
-            note.setText(R.string.booking_note_past);
+            note.setText(s.cancelled ? R.string.session_cancelled_note : R.string.booking_note_past);
         } else {
-            note.setText(R.string.booking_note_upcoming);
+            boolean open = Repo.canJoinSession(s.reference, System.currentTimeMillis());
+            join.setEnabled(open);
+            note.setText(open ? R.string.session_ready : R.string.session_not_open);
             join.setOnClickListener(x -> ((MainActivity) f.requireActivity())
                     .open(LiveClassroomFragment.newInstance(s.reference, s.learner)));
         }

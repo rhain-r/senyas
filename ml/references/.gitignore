@@ -1,6 +1,0 @@
-# Dataset copies and generated files stay local (FSL-105 is downloaded separately).
-data/
-out/
-__pycache__/
-*.pyc
-.venv*/

@@ -1,0 +1,10 @@
+<resources>
+    <string name="feedback_prepare">Gawin ang buong sign, saka ibaba sandali ang mga kamay upang masuri ito.</string>
+    <string name="feedback_show_body">Ipakita ang iyong mga balikat at kamay upang masuri ang posisyon ng sign.</string>
+    <string name="feedback_move">Sundin ang galaw sa demonstrasyon, pati ang hugis ng kamay.</string>
+    <string name="feedback_hold">Tapusin ang sign, saka ibaba sandali ang mga kamay upang kumpirmahin ito.</string>
+    <string name="feedback_try_again">Hindi pa tugma. Panoorin ang demonstrasyon at ulitin ang buong galaw.</string>
+    <string name="feedback_matched">Tugma ang sign. Na-save ang beripikadong marka.</string>
+    <string name="feedback_unsupported">Walang awtomatikong feedback para sa sign na ito sa kasalukuyang modelo.</string>
+    <string name="feedback_unavailable">Hindi makapagsimula ang feedback. Buksang muli ang praktis upang subukang muli.</string>
+</resources>

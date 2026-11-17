@@ -25,24 +25,15 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
- * Learner HOME (Duolingo-style): mascot greeting, streak and XP chips, daily goal, Continue,
- * Practice with camera and the sign of the day, plus the sign dictionary search (typed or spoken).
- * Every number comes from the signed-in account's saved practice progress:
- * <ul>
- *   <li>XP: 10 for every sign with a score in a scenario, and 10 more once it is passed (85+),
- *       so at most 20 per sign per scenario.</li>
- *   <li>Daily goal: 10 XP for each sign that got a new best score today (Progress counts a sign
- *       once a day), out of 50 XP, i.e. five signs improved.</li>
- * </ul>
+ * HOME (Duolingo-style). Mascot + streak/XP header, daily goal, continue / camera buttons,
+ * sign of the day. The sign-dictionary search (typed or spoken) is kept at the top of the sheet.
  */
 public class LearnFragment extends Fragment implements StatusTint {
-
-    static final int XP_PER_SIGN = 10, DAILY_GOAL_XP = 50;
 
     private EditText etSearch;
     private View browse, searchSection;
@@ -63,9 +54,7 @@ public class LearnFragment extends Fragment implements StatusTint {
             });
 
     @Override
-    public int statusColor() {
-        return R.color.home_pattern_a;
-    }
+    public int statusColor() { return R.color.home_pattern_a; }
 
     @Nullable
     @Override
@@ -85,9 +74,39 @@ public class LearnFragment extends Fragment implements StatusTint {
         // The bell sits on the blue header, so make it white.
         ((ImageButton) v.findViewById(R.id.btn_bell)).setColorFilter(Color.WHITE);
 
+        // Header
+        String first = Repo.userName == null ? "" : Repo.userName.trim().split("\\s+")[0];
+        ((TextView) v.findViewById(R.id.tv_bubble)).setText(getString(R.string.home_greeting, first));
+
+        // Daily goal card
+        int goalPct = Math.min(100, Repo.dailyXp * 100 / Math.max(1, Repo.dailyGoalXp));
+        ((LinearProgressIndicator) v.findViewById(R.id.goal_progress)).setProgress(goalPct);
+        ((TextView) v.findViewById(R.id.tv_goal_xp)).setText(
+                getString(R.string.xp_progress, Repo.dailyXp, Repo.dailyGoalXp));
+        ((TextView) v.findViewById(R.id.tv_streak)).setText(getResources().getQuantityString(
+                R.plurals.streak_days, Repo.streakDays, Repo.streakDays));
+        ((TextView) v.findViewById(R.id.tv_xp)).setText(getString(R.string.xp_total, Repo.xp));
+
+        // Continue: the first scenario that is in progress, otherwise the first one
+        Scenario current = Repo.SCENARIOS.get(0);
+        for (Scenario sc : Repo.SCENARIOS) {
+            int progress = Repo.scenarioProgressPct(sc.id);
+            if (progress > 0 && progress < 100) { current = sc; break; }
+        }
+        ((TextView) v.findViewById(R.id.btn_continue)).setText(getString(R.string.home_continue, current.title));
+        v.findViewById(R.id.btn_continue).setOnClickListener(x ->
+                ((MainActivity) requireActivity()).selectTab(R.id.nav_path));
+
         v.findViewById(R.id.btn_camera).setOnClickListener(x ->
                 ((MainActivity) requireActivity()).selectTab(R.id.nav_practice));
 
+        // Sign of the day (changes every day)
+        String[] sotd = Repo.SIGNS[Calendar.getInstance().get(Calendar.DAY_OF_YEAR) % Repo.SIGNS.length];
+        ((TextView) v.findViewById(R.id.tv_sotd)).setText(sotd[0]);
+        v.findViewById(R.id.sotd).setOnClickListener(x -> ((MainActivity) requireActivity())
+                .open(SignLessonFragment.newInstanceForWord(sotd[0], sotd[1])));
+
+        // Search
         v.findViewById(R.id.btn_mic).setOnClickListener(x -> startVoiceSearch());
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int c, int d) {}
@@ -100,84 +119,7 @@ public class LearnFragment extends Fragment implements StatusTint {
     @Override
     public void onResume() {
         super.onResume();
-        if (getView() == null) return;
-        Ui.bindBell(getView(), (MainActivity) requireActivity());
-        Repo.save(); // keeps the Practice Room's latest scores before showing progress
-        renderProgress(getView());
-    }
-
-    /** Greeting, streak, XP, daily goal, Continue and the sign of the day, from the account's progress. */
-    private void renderProgress(View v) {
-        Progress pr = Repo.progress();
-        long today = Repo.today();
-
-        ((TextView) v.findViewById(R.id.tv_bubble)).setText(
-                getString(R.string.home_greeting, Repo.firstName(Repo.userName)));
-
-        int streak = pr.streak(today);
-        TextView tvStreak = v.findViewById(R.id.tv_streak);
-        tvStreak.setText(getResources().getQuantityString(R.plurals.home_streak_days, streak, streak));
-        tvStreak.setContentDescription(streak == 0 ? getString(R.string.streak_none)
-                : getResources().getQuantityString(R.plurals.streak_days, streak, streak));
-
-        int xp = totalXp(pr);
-        TextView tvXp = v.findViewById(R.id.tv_xp);
-        tvXp.setText(getString(R.string.xp_total, xp));
-        tvXp.setContentDescription(getString(R.string.home_xp_desc, xp));
-
-        int todayXp = xpToday(pr, today);
-        ((TextView) v.findViewById(R.id.tv_goal_xp)).setText(
-                getString(R.string.xp_progress, todayXp, DAILY_GOAL_XP));
-        ((LinearProgressIndicator) v.findViewById(R.id.goal_progress))
-                .setProgress(Math.min(100, todayXp * 100 / DAILY_GOAL_XP));
-        v.findViewById(R.id.goal_card).setContentDescription(
-                getString(R.string.home_goal_desc, todayXp, DAILY_GOAL_XP));
-
-        // Continue: the sign the learner is on, in the scenario they are on.
-        Scenario sc = resumeScenario(pr);
-        int index = pr.resumeIndex(sc);
-        int label = pr.completed(sc) ? R.string.home_review
-                : pr.started(sc) ? R.string.home_continue : R.string.home_start;
-        TextView btnContinue = v.findViewById(R.id.btn_continue);
-        btnContinue.setText(getString(label, sc.title(requireContext())));
-        btnContinue.setOnClickListener(x -> ((MainActivity) requireActivity())
-                .open(SignLessonFragment.newInstance(sc.id, index)));
-
-        // Sign of the day: changes daily, always a sign with a bundled video (Repo.SIGNS).
-        String[] sign = Repo.SIGNS[(int) (today % Repo.SIGNS.length)];
-        ((TextView) v.findViewById(R.id.tv_sotd)).setText(sign[0]);
-        ((TextView) v.findViewById(R.id.tv_sotd_meaning)).setText(sign[1]);
-        View sotd = v.findViewById(R.id.sotd);
-        sotd.setContentDescription(getString(R.string.home_sotd_desc, sign[0], sign[1]));
-        sotd.setOnClickListener(x -> ((MainActivity) requireActivity())
-                .open(SignLessonFragment.newInstanceForWord(sign[0], sign[1])));
-    }
-
-    /** 10 XP for every sign with a score, 10 more once it is passed (85+). */
-    static int totalXp(Progress pr) {
-        int scored = pr.scoreSummary(Repo.SCENARIOS)[0], passed = 0;
-        for (Scenario sc : Repo.SCENARIOS) passed += pr.passed(sc);
-        return XP_PER_SIGN * (scored + passed);
-    }
-
-    /** 10 XP for each sign that got a new best score today. */
-    static int xpToday(Progress pr, long today) {
-        int[] week = pr.week(today); // Monday first
-        int day = LocalDate.ofEpochDay(today).getDayOfWeek().getValue() - 1;
-        return XP_PER_SIGN * Math.max(0, week[day]);
-    }
-
-    /**
-     * The scenario the learner is on: the one practised last, unless every sign in it is passed;
-     * then the first scenario that still has signs to pass (or the last one again, to review).
-     */
-    static Scenario resumeScenario(Progress pr) {
-        int last = Math.max(0, Math.min(pr.lastScenario(), Repo.SCENARIOS.size() - 1));
-        Scenario sc = Repo.SCENARIOS.get(last);
-        if (pr.completed(sc)) {
-            for (Scenario other : Repo.SCENARIOS) if (!pr.completed(other)) return other;
-        }
-        return sc;
+        if (getView() != null) Ui.bindBell(getView(), (MainActivity) requireActivity());
     }
 
     private void startVoiceSearch() {

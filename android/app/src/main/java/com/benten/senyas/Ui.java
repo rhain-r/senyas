@@ -81,12 +81,13 @@ public final class Ui {
         v.setTextSize(14);
         v.setTypeface(null, Typeface.BOLD);
         v.setGravity(Gravity.END);
-        v.setTextColor(c.getColor(R.color.text_primary)); // light in dark mode, so it stays readable
+        v.setTextColor(c.getColor(R.color.navy));
         row.addView(v, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f));
         parent.addView(row);
     }
 
     public static String clock(int min, boolean suffix) {
+        min = Math.floorMod(min, 1440);
         int h = min / 60, m = min % 60;
         int h12 = h % 12 == 0 ? 12 : h % 12;
         String s = String.format(Locale.US, "%d:%02d", h12, m);
@@ -95,7 +96,7 @@ public final class Ui {
 
     public static String timeRange(int startMin, int durMin) {
         int end = startMin + durMin;
-        boolean sameHalf = (startMin / 60 < 12) == (end / 60 < 12);
+        boolean sameHalf = (Math.floorMod(startMin, 1440) < 720) == (Math.floorMod(end, 1440) < 720);
         return (sameHalf ? clock(startMin, false) : clock(startMin, true)) + "–" + clock(end, true);
     }
 

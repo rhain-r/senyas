@@ -1,0 +1,6 @@
+<resources>
+    <string name="lesson_video_description">Filipino Sign Language demonstration video</string>
+    <string name="lesson_video_unavailable">No verified video is available for this sign yet. Choose another sign with a video to see a demonstration.</string>
+    <string name="lesson_video_error">This video could not play. Try opening this lesson again.</string>
+    <string name="lesson_video_credit">Video: FSL-105 dataset · Isaiah Jassen Tupal, De la Salle University · CC BY 4.0\nhttps://doi.org/10.17632/48y2y99mb9.2\nhttps://creativecommons.org/licenses/by/4.0/\nOriginal clip · Muted and looped for practice</string>
+</resources>

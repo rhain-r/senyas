@@ -25,7 +25,7 @@ public class LessonFormFragment extends Fragment {
     private boolean editing;
     private Lesson lesson;
     private int duration, rate;
-    private TextInputLayout tilTitle, tilDesc, tilRate;
+    private TextInputLayout tilTitle, tilRate, tilDesc;
     private TextInputEditText etTitle, etDesc, etRate;
     private MaterialAutoCompleteTextView actvCat;
     private View banner;
@@ -41,7 +41,10 @@ public class LessonFormFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle b) {
-        return inflater.inflate(R.layout.fragment_lesson_form, container, false);
+        int id = requireArguments().getInt("id", -1);
+        boolean allowed = id < 0 ? (Repo.accountRole() == Repo.ROLE_TUTOR && (Repo.draft == null || Repo.ownsLesson(Repo.draft)))
+                : Repo.ownedLesson(id) != null;
+        return inflater.inflate(allowed ? R.layout.fragment_lesson_form : R.layout.fragment_session_blocked, container, false);
     }
 
     @Override
@@ -49,13 +52,19 @@ public class LessonFormFragment extends Fragment {
         int id = requireArguments().getInt("id", -1);
         editing = id != -1;
         if (!editing && Repo.draft == null) Repo.startDraft();
-        lesson = editing ? Repo.byId(id) : Repo.draft;
+        lesson = editing ? Repo.ownedLesson(id) : Repo.draft;
+        if (!Repo.ownsLesson(lesson)) {
+            ((TextView) v.findViewById(R.id.blocked_title)).setText(R.string.data_unavailable_title);
+            ((TextView) v.findViewById(R.id.session_blocked_message)).setText(R.string.listing_details_unavailable);
+            v.findViewById(R.id.btn_back).setOnClickListener(x -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+            return;
+        }
         duration = lesson.duration;
 
         Ui.bindTopBar(v, getString(editing ? R.string.title_edit_lesson : R.string.title_new_lesson), requireActivity());
         tilTitle = v.findViewById(R.id.til_title);
-        tilDesc = v.findViewById(R.id.til_desc);
         tilRate = v.findViewById(R.id.til_rate);
+        tilDesc = v.findViewById(R.id.til_desc);
         etTitle = v.findViewById(R.id.et_title);
         etDesc = v.findViewById(R.id.et_desc);
         etRate = v.findViewById(R.id.et_rate);
@@ -85,8 +94,15 @@ public class LessonFormFragment extends Fragment {
             delete.setVisibility(View.VISIBLE);
             primary.setOnClickListener(x -> {
                 if (!validate()) return;
+                String oldTitle = lesson.title, oldDescription = lesson.description, oldCategory = lesson.category;
+                int oldDuration = lesson.duration, oldPrice = lesson.price;
                 apply(lesson);
-                Repo.save();
+                if (!Repo.persist()) {
+                    lesson.title = oldTitle; lesson.description = oldDescription; lesson.category = oldCategory;
+                    lesson.duration = oldDuration; lesson.price = oldPrice;
+                    Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Toast.makeText(requireContext(), R.string.toast_changes_saved, Toast.LENGTH_SHORT).show();
                 requireActivity().getOnBackPressedDispatcher().onBackPressed();
             });
@@ -109,21 +125,20 @@ public class LessonFormFragment extends Fragment {
     }
 
     private boolean validate() {
+        if (!Repo.ownsLesson(lesson)) return false;
         tilTitle.setError(null);
-        tilDesc.setError(null);
         tilRate.setError(null);
+        tilDesc.setError(null);
         boolean ok = true;
-        String title = text(etTitle).replaceAll("\\s+", " ");
-        if (title.isEmpty()) {
+        if (text(etTitle).isEmpty()) {
             tilTitle.setError(getString(R.string.err_title));
             ok = false;
-        } else if (!InputRules.isTitle(title)) {
-            tilTitle.setError(getString(R.string.err_title_format));
-            ok = false;
         }
-        if (!InputRules.isDescription(text(etDesc))) {
-            tilDesc.setError(getString(R.string.err_desc_format));
-            ok = false;
+        if (text(etTitle).length() > 200) {
+            tilTitle.setError(getString(R.string.listing_title_length)); ok = false;
+        }
+        if (text(etDesc).length() > 10000) {
+            tilDesc.setError(getString(R.string.listing_description_length)); ok = false;
         }
         String r = text(etRate);
         rate = 0;
@@ -135,14 +150,9 @@ public class LessonFormFragment extends Fragment {
             if (rate <= 0) {
                 tilRate.setError(getString(R.string.err_rate_zero));
                 ok = false;
-            } else if (!InputRules.isRate(rate)) {
-                tilRate.setError(getString(R.string.err_rate_range));
-                ok = false;
             }
         }
         banner.setVisibility(ok ? View.GONE : View.VISIBLE);
-        // On a short (landscape) screen the field can be out of view: scroll it in.
-        if (!ok) (tilTitle.getError() != null ? etTitle : tilDesc.getError() != null ? etDesc : etRate).requestFocus();
         return ok;
     }
 
@@ -162,8 +172,15 @@ public class LessonFormFragment extends Fragment {
                 .setMessage(getString(R.string.delete_message, lesson.title))
                 .setNegativeButton(R.string.keep_lesson, null)
                 .setPositiveButton(R.string.action_delete, (dlg, w) -> {
-                    Repo.LESSONS.remove(lesson); // TODO (Firebase batch): delete Firestore record + Storage files
-                    Repo.save();
+                    if (!Repo.ownsLesson(lesson)) return;
+                    int index = Repo.LESSONS.indexOf(lesson);
+                    if (index < 0) return;
+                    Repo.LESSONS.remove(index);
+                    if (!Repo.persist()) {
+                        Repo.LESSONS.add(index, lesson);
+                        Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                        return;
+                    }
                     Toast.makeText(requireContext(), R.string.toast_lesson_deleted, Toast.LENGTH_SHORT).show();
                     requireActivity().getOnBackPressedDispatcher().onBackPressed();
                 })

@@ -83,11 +83,12 @@
     <string name="toast_demo_plays">Signed demonstration plays here</string>
     <string name="sign_x_of_y">Sign %1$d of %2$d</string>
     <string name="skip_sign">Skip sign</string>
+    <string name="hold_steady">Hold your sign steady</string>
     <string name="match_pct">%1$d%% match</string>
     <string name="score_matched">Matched!</string>
     <string name="score_almost">Almost there</string>
     <string name="score_keep">Keep practicing</string>
-    <string name="guide_great">✓ Great signing!</string>
+    <string name="guide_great">✓ Great hand position</string>
     <string name="next_sign">Next sign</string>
     <string name="guide_up">↑ Move your hand up</string>
     <string name="guide_open">↔ Open your fingers wider</string>
@@ -176,7 +177,10 @@
     <string name="use_my_location_or_choose">Use my location or choose a city manually.</string>
     <string name="start_with_everyday_signs">Start with everyday signs</string>
     <string name="choose_a_local_situation_and">Choose a local situation and learn at your pace.</string>
+    <string name="s_3_day_streak">3-day streak</string>
+    <string name="s_6_lessons_completed">6 lessons completed</string>
     <string name="continue_learning">Continue learning</string>
+    <string name="next_public_service_conversations">Next: public service conversations</string>
     <string name="lesson_cover_photo_placeholder">Lesson cover photo placeholder</string>
     <string name="cover_photo">Cover photo</string>
     <string name="play_signed_lesson_preview">Play signed lesson preview</string>
@@ -231,7 +235,7 @@
     <string name="try_again">Try again</string>
     <string name="practice_complete">PRACTICE COMPLETE</string>
     <string name="every_attempt_counts">Every attempt counts</string>
-    <string name="your_sample_score_is_saved">Your best score for each sign is saved to your account.</string>
+    <string name="your_sample_score_is_saved">Your sample score is saved to your practice history.</string>
     <string name="signs_practiced">signs practiced</string>
     <string name="keep_working_on">Keep working on</string>
     <string name="practice_again">Practice again</string>
@@ -309,8 +313,8 @@
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_listings">Listings</string>
     <string name="nav_users">Users</string>
-    <string name="login_as">Log in to</string>
-    <string name="login_demo_note">Your role comes from your account. Admin console is for the class demo and still needs your email and password.</string>
+    <string name="login_as">Log in as (demo)</string>
+    <string name="login_demo_note">Demo only: choose a role to preview its screens. In the real app your role comes from your account.</string>
     <string name="profile_overview">Your activity</string>
     <string name="profile_learner_stat">Practice average: %1$d%% · %2$d signs practiced</string>
     <string name="profile_admin_note">You can review listings, manage users and release payouts.</string>
@@ -411,9 +415,9 @@
     <string name="notif_t7_body">%1$s is waiting for a payout of %2$s.</string>
     <string name="chart_scores_title">Your sign scores</string>
     <string name="chart_scores_caption" formatted="false">Filled bars passed (85% or higher). Outlined bars need more practice. A dash means not tried yet.</string>
-    <string name="chart_week_title">New best scores this week</string>
+    <string name="chart_week_title">Practice minutes this week (sample data)</string>
     <string name="chart_scores_desc">Bar chart of your practice scores by sign</string>
-    <string name="chart_week_desc">Bar chart of new best scores by day</string>
+    <string name="chart_week_desc">Bar chart of practice minutes by day</string>
     <plurals name="search_results_count">
         <item quantity="one">%d sign found</item>
         <item quantity="other">%d signs found</item>
@@ -427,60 +431,72 @@
         <item>S</item>
         <item>S</item>
     </string-array>
-    <!-- Live Practice Room (camera + hand tracking) -->
-    <string name="hand_not_detected">No hand detected</string>
-    <string name="camera_off">Camera off</string>
-    <string name="no_score" translatable="false">—</string>
-    <string name="tracking_failed">Hand tracking could not start: %1$s</string>
-    <string name="camera_failed">Camera could not start: %1$s</string>
-    <string name="guide_show_hand">Show your hands inside the guide</string>
-    <string name="guide_left">← Move your hand left</string>
-    <string name="guide_right">→ Move your hand right</string>
-    <string-array name="finger_names">
-        <item>thumb</item>
-        <item>index finger</item>
-        <item>middle finger</item>
-        <item>ring finger</item>
-        <item>little finger</item>
-    </string-array>
-    <string name="tip_good">✓ Good! It matches the FSL signers</string>
-    <string name="tip_keep_in_view">Keep your hand in view for the whole sign</string>
-    <string name="tip_straighten">%1$s: straighten your %2$s more</string>
-    <string name="tip_bend">%1$s: bend your %2$s more</string>
-    <string name="tip_palm">%1$s: turn your palm to face %2$s</string>
-    <string name="tip_point">%1$s: point your fingers %2$s</string>
-    <string name="tip_move">%1$s: move your hand further %2$s</string>
-    <string name="tip_move_toward">%1$s: move your hand %2$s</string>
-    <string name="tip_hold_still">%1$s: keep your hand still</string>
-    <string name="tip_bigger">Make the movement bigger</string>
-    <string name="tip_smaller">Make the movement smaller</string>
-    <string name="tip_both_hands">This sign uses both hands: keep both in view</string>
-    <string name="tip_second_hand_move">Move your other hand further %1$s</string>
-    <string name="tip_second_hand_copy">Copy the other hand\'s shape from the video</string>
-    <string name="tip_one_hand">This sign uses one hand: keep the other one still</string>
-    <string name="tip_almost">Watch the video again and repeat the whole sign</string>
-    <string name="when_start">At the start</string>
-    <string name="when_middle">In the middle</string>
-    <string name="when_end">At the end</string>
-    <string name="dir_left">left</string>
-    <string name="dir_right">right</string>
-    <string name="dir_up">up</string>
-    <string name="dir_down">down</string>
-    <string name="dir_toward_camera">toward the camera</string>
-    <string name="dir_away">away from you</string>
-    <string name="part_handshape">hand shape</string>
-    <string name="part_orientation">palm direction</string>
-    <string name="part_movement">movement</string>
-    <string name="part_second_hand">second hand</string>
-    <string name="parts_and">%1$s and %2$s</string>
-    <string name="score_note_right">✓ Right so far: %1$s. Reach 85%% to mark this sign as correct.</string>
-    <string name="score_waiting">Sign when ready</string>
-    <string name="score_no_reference">No reference yet</string>
-    <string name="score_no_reference_note">Senyas has no scored reference for this sign yet. Watch the sign and practise: hand tracking still works.</string>
-    <string name="sign_lab_title">Sign Lab</string>
-    <string name="sign_lab_sub">Record reference signs and test the camera</string>
-    <string name="work_none_scored">No sign has a score yet. In the Practice Room, sign inside the camera guide until the match score appears.</string>
-    <string name="no_sign_video">No video for this sign yet</string>
-    <string name="sign_video_desc">Video of the sign %1$s (%2$s)</string>
-    <string name="video_credit_fsl105" translatable="false">Video: FSL-105 dataset, I. J. Tupal, De La Salle University (CC BY 4.0), doi.org/10.17632/48y2y99mb9.2. Compressed for the app.</string>
+    <string name="home_greeting">Kumusta, %1$s! Let\'s sign!</string>
+    <string name="daily_goal">Daily goal</string>
+    <string name="xp_progress">%1$d / %2$d XP</string>
+    <string name="xp_total">%1$d XP</string>
+    <string name="xp_reward">+%1$d</string>
+    <string name="home_continue">Continue: %1$s</string>
+    <string name="btn_practice_camera">Practice with camera</string>
+    <string name="sign_of_the_day">Sign of the day</string>
+    <plurals name="streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="path_title">Learning path</string>
+    <string name="path_unit">Unit %1$d</string>
+    <string name="path_start">Start</string>
+    <string name="path_locked_toast">Finish the earlier signs to unlock this one</string>
+    <string name="path_node_done">%1$s, completed</string>
+    <string name="path_node_current">%1$s, start here</string>
+    <string name="path_node_locked">%1$s, locked</string>
+    <string name="learn_this_sign">Learn this sign</string>
+    <string name="im_ready">I\'m ready, try it</string>
+    <string name="watch_again">Watch again</string>
+    <string name="slow_motion">Slow motion</string>
+    <string name="hint_default">Copy the movement you see</string>
+    <string name="done">Done</string>
+    <string name="close">Close</string>
+    <string name="sign_title">Sign: %1$s</string>
+    <string name="tracking_points">Tracking 21 points</string>
+    <string name="sheet_great">Galing! That\'s %1$s</string>
+    <string name="sheet_almost">Almost there!</string>
+    <string name="sheet_keep">Keep practicing</string>
+    <string name="btn_continue">Continue</string>
+    <string name="profile_bookings_sub">Your upcoming and past sessions</string>
+    <string name="camera_starting">Starting camera…</string>
+    <string name="camera_permission_needed">Allow camera access to see yourself.</string>
+    <string name="camera_allow">Allow camera</string>
+    <string name="camera_no_hardware">No camera found on this device.</string>
+    <string name="camera_cannot_open">Camera unavailable. Close other camera apps and try again.</string>
+    <string name="camera_live">Your camera</string>
+    <string name="camera_show_hands">Bring your hands into view</string>
+    <string name="camera_tracking_unavailable">Camera ready · Hand tracking unavailable</string>
+    <plurals name="camera_hands">
+        <item quantity="one">%d hand tracked</item>
+        <item quantity="other">%d hands tracked</item>
+    </plurals>
+    <string name="practice_ungraded">Ungraded practice</string>
+    <string name="practice_camera_guide">Keep your hands and upper body in view</string>
+    <string name="practice_feedback_unavailable">Automatic sign feedback is not available yet. You can still use the camera to practice.</string>
+    <string name="practice_next_sign">Next sign</string>
+    <string name="practice_no_grades">No graded attempts yet</string>
+    <string name="practice_signs_graded">Signs with feedback</string>
+    <string name="classroom_waiting_video">Waiting for tutor video</string>
+    <string name="classroom_local_preview">Your camera preview</string>
+    <string name="classroom_not_connected">Your preview is local. Tutor video is not connected.</string>
+    <string name="report_user_title">Report a user or tutor</string>
+    <string name="report_user_sub">Report inappropriate behavior, spam, or policy violations</string>
+    <string name="report_dialog_title">Report User or Tutor</string>
+    <string name="report_target_hint">User or Tutor Name / Email</string>
+    <string name="report_reason_title">Select Reason</string>
+    <string name="report_reason_inappropriate">Inappropriate behavior or harassment</string>
+    <string name="report_reason_spam">Fake listing or spam</string>
+    <string name="report_reason_noshow">No-show for scheduled session</string>
+    <string name="report_reason_other">Other policy violation</string>
+    <string name="report_details_hint">Describe the issue (optional)</string>
+    <string name="btn_submit_report">Submit Report</string>
+    <string name="report_submitted_toast">Thank you. Your report has been submitted to the Senyas team for review.</string>
+    <string name="report_err_target">Please enter the user or tutor name/email.</string>
+    <string name="report_this_tutor">Report this tutor</string>
 </resources>

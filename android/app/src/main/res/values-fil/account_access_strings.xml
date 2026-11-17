@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_password_requirement">Gumamit ng hindi bababa sa 8 character.</string>
+    <string name="account_login_failed">Mali ang email o password, o suspendido ang account.</string>
+    <string name="account_email_exists">May account na gumagamit ng email na ito. Mag-log in gamit ang dati nitong tungkulin.</string>
+    <string name="account_registration_failed">Hindi nagawa ang account. Suriin ang mga detalye at subukang muli.</string>
+    <string name="account_access_denied">Walang access ang account mo sa screen na ito.</string>
+    <string name="session_not_open">Maaari lang sumali sa nakatakdang oras gamit ang account ng naka-book na mag-aaral o tutor.</string>
+    <string name="session_ready">Bukas na ang session mo. Maaari ka nang sumali.</string>
+    <string name="session_schedule_note">Ang oras ay nasa Philippine time (PHT). Maaari kang sumali sa nakatakdang oras ng simula.</string>
+    <string name="session_slot_unavailable">Hindi na available ang oras na ito. Pumili ng ibang iskedyul.</string>
+    <string name="session_no_slots">Walang available na oras ngayong araw. Pumili ng ibang araw.</string>
+    <string name="session_unavailable_title">Hindi available ang session</string>
+    <string name="data_unavailable_title">Hindi available ang mga detalye</string>
+    <string name="booking_details_unavailable">Hindi available ang detalye ng booking. Bumalik sa mga booking mo para tingnan ang session.</string>
+    <string name="listing_details_unavailable">Hindi available ang araling ito o hindi ito pag-aari ng account mo.</string>
+</resources>

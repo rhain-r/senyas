@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="firebase_backend_enabled">true</bool>
+    <bool name="firebase_emulators_enabled">true</bool>
+    <string name="app_name">Senyas Emulator Test</string>
+</resources>

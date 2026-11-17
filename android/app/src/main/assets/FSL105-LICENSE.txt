@@ -1,0 +1,36 @@
+FSL-105: A dataset for recognizing 105 Filipino sign language videos
+Isaiah Jassen Tupal, De la Salle University. Version 2, published 2 June 2023.
+Source: https://doi.org/10.17632/48y2y99mb9.2
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+
+Bundled clips are unmodified original video files from clips.zip, sample 0 of
+each selected label. Playback may be muted, looped or slowed by the app.
+No endorsement by the creator or institution is implied.
+
+assets/fsl_recognizer.bin contains classifier weights derived from this dataset
+using hand/body landmarks, a trained neural network, and calibrated decision
+thresholds. This is an adaptation; it is not an original dataset model or an
+endorsement. The same CC BY 4.0 attribution applies to the derived asset.
+Evaluation details and limitations are in fsl_recognizer_report.json and ml/README.md.
+
+The pose_landmarker_lite.task and hand_landmarker.task are Google MediaPipe
+models, distributed under their upstream Apache 2.0 license:
+https://github.com/google-ai-edge/mediapipe/blob/master/LICENSE
+https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker
+
+Resource                 Dataset path        Dataset label
+res/raw/fsl105_0.mov      clips/0/0.MOV       GOOD MORNING
+res/raw/fsl105_2.mov      clips/2/0.MOV       GOOD EVENING
+res/raw/fsl105_3.mov      clips/3/0.MOV       HELLO
+res/raw/fsl105_7.mov      clips/7/0.MOV       THANK YOU
+res/raw/fsl105_8.mov      clips/8/0.MOV       YOURE WELCOME
+res/raw/fsl105_14.mov     clips/14/0.MOV      NO
+res/raw/fsl105_15.mov     clips/15/0.MOV      YES
+res/raw/fsl105_52.mov     clips/52/0.MOV      FATHER
+res/raw/fsl105_53.mov     clips/53/0.MOV      MOTHER
+
+The complete original labels.csv is included as fsl105-labels.csv. Other app
+words have no video in this licensed subset and are explicitly marked unavailable.
+Original clips.zip SHA-256:
+c048c0820be1621101dfedeabb76a9fbfca76ed2868eebe23b4cb90d5c748463

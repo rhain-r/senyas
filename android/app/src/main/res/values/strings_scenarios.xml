@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="scenario_title_0">At the sari-sari store</string>
-    <string name="scenario_title_1">Riding a jeepney</string>
-    <string name="scenario_title_2">Public services</string>
-    <string name="scenario_label_0">Sari-sari store scenario</string>
-    <string name="scenario_label_1">Jeepney scenario</string>
-    <string name="scenario_label_2">Public service scenario</string>
-</resources>

@@ -1,0 +1,180 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile(uid) { return get(/databases/$(database)/documents/profiles/$(uid)).data; }
+    function active() { return signedIn() && profile(request.auth.uid).active == true; }
+    function admin() { return active() && profile(request.auth.uid).role == 3; }
+    function learner() { return active() && profile(request.auth.uid).role in [0, 1]; }
+    function tutor() { return active() && profile(request.auth.uid).role == 2; }
+    function text(value, maximum) { return value is string && value.size() > 0 && value.size() <= maximum; }
+
+    match /profiles/{uid} {
+      allow read: if signedIn() && (uid == request.auth.uid || admin());
+      allow create: if signedIn() && uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'role', 'active'])
+        && request.resource.data.uid == uid && request.resource.data.email == request.auth.token.email
+        && text(request.resource.data.name, 100)
+        && request.resource.data.role is int && request.resource.data.role in [0, 1, 2]
+        && request.resource.data.active == true;
+      allow update: if (active() && uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && text(request.resource.data.name, 100))
+        || (admin() && resource.data.role != 3
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active'])
+          && request.resource.data.active is bool);
+      allow delete: if false;
+      match /notificationReads/{key} {
+        allow read: if active() && uid == request.auth.uid;
+        allow create, update: if active() && uid == request.auth.uid && key.size() <= 128
+          && request.resource.data.keys().hasOnly(['read']) && request.resource.data.read == true;
+      }
+    }
+
+    function validLesson(d, id) {
+      return d.keys().hasOnly(['id', 'tutorId', 'tutor', 'title', 'category', 'description', 'price',
+          'duration', 'available', 'reviewed', 'days', 'slots', 'offers', 'city', 'distanceKm',
+          'tileColor', 'darkText', 'hasCover', 'hasPreview', 'previewSeconds'])
+        && d.id is int && d.id > 0 && string(d.id) == id
+        && text(d.tutorId, 128) && d.tutor == profile(d.tutorId).name
+        && text(d.title, 200) && d.category in ['K-12 Academic Support', 'Digital & Tech Skills',
+          'Vocational & TESDA Prep', 'Life & Financial Literacy']
+        && d.description is string && d.description.size() <= 10000
+        && d.price is int && d.price > 0 && d.price <= 10000000
+        && d.duration is int && d.duration in [30, 60]
+        && d.available is bool && d.reviewed is bool
+        && d.days is list && d.days.size() > 0 && d.days.size() <= 100
+        && text(d.slots, 20000) && d.offers is list && d.offers.size() > 0 && d.offers.size() <= 4096
+        && text(d.city, 200) && d.distanceKm is number && d.distanceKm >= 0 && d.distanceKm <= 20000
+        && d.tileColor is int && d.darkText is bool && d.hasCover is bool && d.hasPreview is bool
+        && d.previewSeconds is int && d.previewSeconds >= 0 && d.previewSeconds <= 3600;
+    }
+    match /lessons/{id} {
+      allow get: if tutor() && resource == null;
+      allow read: if active() && (resource.data.reviewed == true || resource.data.tutorId == request.auth.uid || admin());
+      allow create: if tutor() && request.resource.data.tutorId == request.auth.uid
+        && request.resource.data.reviewed == false && validLesson(request.resource.data, id);
+      allow update: if (tutor() && resource.data.tutorId == request.auth.uid
+          && request.resource.data.tutorId == resource.data.tutorId
+          && request.resource.data.id == resource.data.id && request.resource.data.reviewed == false
+          && validLesson(request.resource.data, id))
+        || (admin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reviewed'])
+          && request.resource.data.reviewed is bool);
+      allow delete: if admin() || (tutor() && resource.data.tutorId == request.auth.uid);
+    }
+
+    // One day document serializes bookings across every listing owned by the tutor.
+    // Exact minute sets preserve arbitrary start times without one rule lookup per minute.
+    function thirtyKeys(m) {
+      return [string(m), string(m+1), string(m+2), string(m+3), string(m+4), string(m+5),
+        string(m+6), string(m+7), string(m+8), string(m+9), string(m+10), string(m+11),
+        string(m+12), string(m+13), string(m+14), string(m+15), string(m+16), string(m+17),
+        string(m+18), string(m+19), string(m+20), string(m+21), string(m+22), string(m+23),
+        string(m+24), string(m+25), string(m+26), string(m+27), string(m+28), string(m+29)];
+    }
+    function minutes(b) {
+      let m = int(b.startAtMillis / 60000);
+      return b.duration == 30 ? thirtyKeys(m) : thirtyKeys(m).concat(thirtyKeys(m+30));
+    }
+    function dayNumber(b) { return int((b.startAtMillis + 28800000) / 86400000); }
+    function dayKey(b) { return b.tutorId + '_' + string(dayNumber(b)); }
+    function dayPath(b) { return /databases/$(database)/documents/tutorDays/$(dayKey(b)); }
+    function oldBusy(b) { return exists(dayPath(b)) ? get(dayPath(b)).data.busy : {}; }
+    function added(before, after, b) {
+      let diff = after.diff(before);
+      return after is map && after.size() <= 1440 && after.values().hasOnly([true])
+        && diff.addedKeys() == minutes(b).toSet()
+        && diff.removedKeys().size() == 0 && diff.changedKeys().size() == 0;
+    }
+    function removed(before, after, b) {
+      let diff = after.diff(before);
+      return diff.removedKeys() == minutes(b).toSet()
+        && diff.addedKeys().size() == 0 && diff.changedKeys().size() == 0;
+    }
+    function validBooking(b, reference) {
+      let l = get(/databases/$(database)/documents/lessons/$(string(b.lessonId))).data;
+      return b.keys().hasOnly(['reference', 'lessonId', 'learnerId', 'tutorId', 'learner', 'tutor',
+          'title', 'category', 'startAtMillis', 'endAtMillis', 'duration', 'price', 'paymentKind',
+          'paymentLast4', 'cancelled', 'released', 'createdAt'])
+        && text(reference, 80) && b.reference == reference && b.lessonId is int
+        && b.learnerId == request.auth.uid && b.learner == profile(request.auth.uid).name
+        && b.tutorId == l.tutorId && b.tutor == l.tutor && b.title == l.title && b.category == l.category
+        && l.reviewed == true && l.available == true && profile(b.tutorId).active == true
+        && b.duration is int && b.duration in [30, 60] && b.price is int
+        && b.price == int(l.price * b.duration / l.duration) && b.price > 0
+        && b.startAtMillis is int && b.endAtMillis is int && b.startAtMillis % 60000 == 0
+        && b.startAtMillis in l.offers && b.startAtMillis > request.time.toMillis()
+        && b.startAtMillis <= request.time.toMillis() + 316224000000
+        && (b.startAtMillis + 28800000) % 86400000 + b.duration * 60000 <= 86400000
+        && b.endAtMillis == b.startAtMillis + b.duration * 60000
+        && b.paymentKind in ['GCash', 'Maya', 'Card'] && b.paymentLast4 is string
+        && ((b.paymentKind == 'Card' && b.paymentLast4.matches('[0-9]{4}'))
+          || (b.paymentKind != 'Card' && b.paymentLast4 == ''))
+        && b.cancelled == false && b.released == false && b.createdAt == request.time;
+    }
+    match /bookings/{reference} {
+      allow get: if learner() && resource == null;
+      allow read: if active() && (resource.data.learnerId == request.auth.uid
+        || resource.data.tutorId == request.auth.uid || admin());
+      allow create: if learner() && validBooking(request.resource.data, reference)
+        && getAfter(dayPath(request.resource.data)).data.bookingId == reference
+        && added(oldBusy(request.resource.data), getAfter(dayPath(request.resource.data)).data.busy, request.resource.data);
+      allow update: if (learner() && resource.data.learnerId == request.auth.uid
+          && resource.data.cancelled == false && request.resource.data.cancelled == true
+          && resource.data.startAtMillis > request.time.toMillis()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cancelled'])
+          && getAfter(dayPath(resource.data)).data.bookingId == reference
+          && removed(oldBusy(resource.data), getAfter(dayPath(resource.data)).data.busy, resource.data))
+        || (admin() && resource.data.cancelled == false && resource.data.released == false
+          && request.resource.data.released == true && resource.data.endAtMillis <= request.time.toMillis()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['released']));
+      allow delete: if false;
+    }
+    function validClaim(before, d, id) {
+      let path = /databases/$(database)/documents/bookings/$(d.bookingId);
+      let b = getAfter(path).data;
+      return d.keys().hasOnly(['tutorId', 'day', 'bookingId', 'busy'])
+        && d.tutorId == b.tutorId && d.day == dayNumber(b) && id == dayKey(b)
+        && b.learnerId == request.auth.uid && b.duration in [30, 60] && d.busy is map
+        && ((!exists(path) && b.cancelled == false && added(before, d.busy, b))
+          || (exists(path) && get(path).data.cancelled == false && b.cancelled == true && removed(before, d.busy, b)));
+    }
+    match /tutorDays/{id} {
+      allow read: if active();
+      allow create: if learner() && validClaim({}, request.resource.data, id);
+      allow update: if learner() && validClaim(resource.data.busy, request.resource.data, id);
+      allow delete: if false;
+    }
+
+    match /progress/{uid} {
+      function valid(d) {
+        return d.keys().hasOnly(['scenario', 'index', 'scores', 'path', 'xp', 'dailyXp', 'streak', 'rewarded', 'day'])
+          && d.scenario is int && d.scenario >= 0 && d.scenario <= 2 && d.index is int && d.index >= 0
+          && d.index < (d.scenario == 0 ? 10 : 5)
+          && d.scores is list && d.scores.size() == (d.scenario == 0 ? 10 : 5)
+          && d.path is map && d.path.keys().hasOnly(['0', '1', '2'])
+          && d.path['0'] is list && d.path['0'].size() == 10
+          && d.path['1'] is list && d.path['1'].size() == 5 && d.path['2'] is list && d.path['2'].size() == 5
+          && d.xp is int && d.xp >= 0 && d.xp <= 10000000
+          && d.dailyXp is int && d.dailyXp >= 0 && d.dailyXp <= d.xp
+          && d.streak is int && d.streak >= 0 && d.streak <= 100000
+          && d.rewarded is list && d.rewarded.size() <= 1000
+          && d.day is string && d.day.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}');
+      }
+      allow read: if learner() && uid == request.auth.uid;
+      allow create, update: if learner() && uid == request.auth.uid && valid(request.resource.data);
+    }
+    match /attendance/{reference}/participants/{uid} {
+      function participant() {
+        let b = get(/databases/$(database)/documents/bookings/$(reference)).data;
+        return active() && !b.cancelled && request.auth.uid in [b.learnerId, b.tutorId]
+          && request.time.toMillis() >= b.startAtMillis && request.time.toMillis() < b.endAtMillis;
+      }
+      allow read: if participant();
+      allow create, update: if participant() && uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'joinedAt'])
+        && request.resource.data.uid == uid && request.resource.data.joinedAt == request.time;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

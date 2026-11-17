@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Landscape Home: the white sheet sits beside the blue header, rounded on the header's side. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="@color/surface" />
-    <corners android:topLeftRadius="28dp" android:bottomLeftRadius="28dp" />
-</shape>

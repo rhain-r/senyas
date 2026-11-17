@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="local_save_failed">Hindi na-save ang mga pagbabago. Pakisubukang muli.</string>
+    <string name="listing_title_length">Gumamit ng hanggang 200 character para sa pamagat.</string>
+    <string name="listing_description_length">Gumamit ng hanggang 10,000 character para sa paglalarawan.</string>
+    <string name="listing_city_length">Gumamit ng hanggang 200 character para sa lungsod.</string>
+    <string name="listing_details_required">Kumpletuhin ang pamagat, kategorya, tagal at bayad ng aralin bago ilathala.</string>
+    <string name="session_cancelled_label">Kinansela</string>
+    <string name="session_cancelled_note">Kinansela ang session na ito.</string>
+</resources>

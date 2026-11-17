@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="scenario_title_0">Sa sari-sari store</string>
-    <string name="scenario_title_1">Pagsakay sa dyip</string>
-    <string name="scenario_title_2">Mga serbisyong pampubliko</string>
-    <string name="scenario_label_0">Senaryo sa sari-sari store</string>
-    <string name="scenario_label_1">Senaryo sa dyip</string>
-    <string name="scenario_label_2">Senaryo sa serbisyong pampubliko</string>
-</resources>

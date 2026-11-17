@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.ChipGroup;
+import java.util.ArrayList;
 
 /** Admin: release tutor payouts once sessions are completed. */
 public class AdminPayoutsFragment extends Fragment {
@@ -58,14 +59,30 @@ public class AdminPayoutsFragment extends Fragment {
 
             View release = row.findViewById(R.id.btn_release);
             release.setVisibility(p.released ? View.GONE : View.VISIBLE);
+            release.setEnabled(canRelease(p));
             release.setOnClickListener(x -> {
+                if (p.released || !canRelease(p)) return;
+                ArrayList<Repo.Notif> previousNotifications = new ArrayList<>(Repo.NOTIFS);
                 p.released = true; // TODO (Firebase batch): trigger the real GCash/Maya payout
-                Repo.notifyOwner(p, Repo.N_PAYOUT_RELEASED, Ui.peso(p.amount), "");
+                Repo.addNotifFor(p.tutorId, 1, Repo.N_PAYOUT_RELEASED, Ui.peso(p.amount), "", 0, false);
+                if (!Repo.persist()) {
+                    p.released = false;
+                    Repo.NOTIFS.clear(); Repo.NOTIFS.addAll(previousNotifications);
+                    Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Toast.makeText(requireContext(), getString(R.string.toast_payout_released, p.tutor),
                         Toast.LENGTH_SHORT).show();
                 render();
             });
             list.addView(row);
         }
+    }
+
+    private boolean canRelease(Repo.Payout payout) {
+        if (payout.reference == null || payout.reference.isEmpty()) return true;
+        Repo.TutorSession session = Repo.sessionByReference(payout.reference);
+        return session != null && !session.cancelled && session.endAtMillis > 0
+                && System.currentTimeMillis() >= session.endAtMillis;
     }
 }

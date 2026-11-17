@@ -1,4 +1,4 @@
-# Android / Gradle
+# ── Android / Gradle ─────────────────────────────────────────
 .gradle/
 .kotlin/
 build/
@@ -11,27 +11,38 @@ local.properties
 *.apk
 *.aab
 
-# Release signing key and its passwords: never commit these.
+# Release signing keys: never commit these.
 keystore/
 *.jks
 *.keystore
 keystore.properties
 
-# Firebase config (per project, not shared)
+# ── Private files ────────────────────────────────────────────
+# Firebase client config (each team member adds their own copy).
 google-services.json
+# Plain-text passwords for the demo test accounts.
+demo_accounts_private.json
 
-# Python
+# ── Firebase backend ─────────────────────────────────────────
+node_modules/
+.firebase/
+*-debug.log
+
+# ── Machine-learning pipeline (large, regenerated) ───────────
 __pycache__/
 *.py[cod]
 .venv/
 venv/
-*.egg-info/
 .ipynb_checkpoints/
+ml/cache/
+ml/runs/
+ml/extraction-errors.json
+*.log
 
-# Pipeline data and outputs (large, regenerated from FSL-105)
-ml/**/data/
-ml/**/out/
+# ── Scratch output ───────────────────────────────────────────
+tmp/
+output/
 
-# OS
+# ── Operating system ─────────────────────────────────────────
 .DS_Store
 Thumbs.db

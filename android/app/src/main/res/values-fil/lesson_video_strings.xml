@@ -1,0 +1,6 @@
+<resources>
+    <string name="lesson_video_description">Bidyo ng pagpapakita ng Filipino Sign Language</string>
+    <string name="lesson_video_unavailable">Wala pang beripikadong bidyo para sa senyas na ito. Pumili ng ibang senyas na may bidyo upang makita ang demonstrasyon.</string>
+    <string name="lesson_video_error">Hindi ma-play ang bidyo. Subukang buksan muli ang araling ito.</string>
+    <string name="lesson_video_credit">Bidyo: FSL-105 dataset · Isaiah Jassen Tupal, De la Salle University · CC BY 4.0\nhttps://doi.org/10.17632/48y2y99mb9.2\nhttps://creativecommons.org/licenses/by/4.0/\nOrihinal na clip · Walang tunog at inuulit para sa pagsasanay</string>
+</resources>

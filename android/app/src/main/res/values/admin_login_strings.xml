@@ -1,0 +1,4 @@
+<resources>
+    <string name="admin_login_entry">Administrator sign in</string>
+    <string name="admin_login_help">Use your assigned administrator email and password. Your account determines console access.</string>
+</resources>

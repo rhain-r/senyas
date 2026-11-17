@@ -35,12 +35,20 @@ public class AdminListingsFragment extends Fragment {
         tvSub = v.findViewById(R.id.tv_sub);
         list = v.findViewById(R.id.list);
         render();
+        refreshFromCloud();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (list != null) render();
+        if (list != null) { render(); refreshFromCloud(); }
+    }
+
+    private void refreshFromCloud() {
+        if (!CloudRuntime.enabled()) return;
+        CloudData.refresh().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && isAdded() && list != null) render();
+        });
     }
 
     private void render() {
@@ -64,8 +72,23 @@ public class AdminListingsFragment extends Fragment {
             View approve = card.findViewById(R.id.btn_approve);
             approve.setVisibility(l.reviewed ? View.GONE : View.VISIBLE);
             approve.setOnClickListener(x -> {
+                if (CloudRuntime.enabled()) {
+                    CloudUi.run(this, approve, CloudData.approveLesson(l), ignored -> {
+                        Toast.makeText(requireContext(), R.string.toast_approved, Toast.LENGTH_SHORT).show();
+                        render();
+                    });
+                    return;
+                }
+                boolean oldReviewed = l.reviewed;
+                ArrayList<Repo.Notif> previousNotifications = new ArrayList<>(Repo.NOTIFS);
                 l.reviewed = true; // TODO (Firebase batch): update the listing in Firestore
-                Repo.notifyOwner(l, Repo.N_LISTING_APPROVED, l.title, "");
+                Repo.addNotifFor(l.tutorId, 1, Repo.N_LISTING_APPROVED, l.title, "", 0, false);
+                if (!Repo.persist()) {
+                    l.reviewed = oldReviewed;
+                    Repo.NOTIFS.clear(); Repo.NOTIFS.addAll(previousNotifications);
+                    Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Toast.makeText(requireContext(), R.string.toast_approved, Toast.LENGTH_SHORT).show();
                 render();
             });
@@ -74,7 +97,21 @@ public class AdminListingsFragment extends Fragment {
                     .setMessage(getString(R.string.remove_message, l.title, l.tutor))
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(R.string.btn_remove, (d, w) -> {
-                        Repo.LESSONS.remove(l);
+                        if (CloudRuntime.enabled()) {
+                            CloudUi.run(this, card.findViewById(R.id.btn_remove), CloudData.deleteLesson(l), ignored -> {
+                                Toast.makeText(requireContext(), R.string.toast_removed, Toast.LENGTH_SHORT).show();
+                                render();
+                            });
+                            return;
+                        }
+                        int index = Repo.LESSONS.indexOf(l);
+                        if (index < 0) return;
+                        Repo.LESSONS.remove(index);
+                        if (!Repo.persist()) {
+                            Repo.LESSONS.add(index, l);
+                            Toast.makeText(requireContext(), R.string.local_save_failed, Toast.LENGTH_LONG).show();
+                            return;
+                        }
                         Toast.makeText(requireContext(), R.string.toast_removed, Toast.LENGTH_SHORT).show();
                         render();
                     })

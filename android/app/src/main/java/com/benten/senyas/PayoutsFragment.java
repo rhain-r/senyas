@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.ChipGroup;
 
-/** The signed-in tutor's payouts from sessions booked on their listings. */
 public class PayoutsFragment extends Fragment {
 
     @Nullable
@@ -30,7 +29,8 @@ public class PayoutsFragment extends Fragment {
 
         LinearLayout list = v.findViewById(R.id.list);
         LayoutInflater inf = LayoutInflater.from(requireContext());
-        for (Repo.Payout p : Repo.myPayouts()) {
+        for (Repo.Payout p : Repo.PAYOUTS) {
+            if (!Repo.accountId().equals(p.tutorId)) continue;
             View row = inf.inflate(R.layout.item_payout, list, false);
             ((TextView) row.findViewById(R.id.tv_title)).setText(p.title);
             ((TextView) row.findViewById(R.id.tv_amount)).setText(Ui.peso(p.amount));

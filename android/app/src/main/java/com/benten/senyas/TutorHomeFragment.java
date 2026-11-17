@@ -14,12 +14,15 @@ import androidx.fragment.app.Fragment;
 
 import java.util.List;
 
-/** Tutor home: the signed-in tutor's pending payout, next session and recent sessions. */
 public class TutorHomeFragment extends Fragment {
 
     private LinearLayout stats, recent;
     private FrameLayout nextHolder;
     private TextView tvGreeting;
+    private final android.os.Handler refreshHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable refreshHome = new Runnable() {
+        @Override public void run() { if (stats != null && isResumed()) { render(); refreshHandler.postDelayed(this, 1000); } }
+    };
 
     @Nullable
     @Override
@@ -46,8 +49,12 @@ public class TutorHomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (stats != null) render();
+        refreshHandler.removeCallbacks(refreshHome);
+        if (stats != null) refreshHandler.post(refreshHome);
     }
+
+    @Override public void onPause() { refreshHandler.removeCallbacks(refreshHome); super.onPause(); }
+    @Override public void onDestroyView() { refreshHandler.removeCallbacks(refreshHome); stats = recent = null; nextHolder = null; super.onDestroyView(); }
 
     private void render() {
         stats.removeAllViews();
@@ -56,11 +63,12 @@ public class TutorHomeFragment extends Fragment {
         tvGreeting.setText(getString(R.string.greeting_hello, Repo.userName));
         Ui.bindBell(requireView(), (MainActivity) requireActivity());
 
-        List<Repo.TutorSession> mine = Repo.mySessions();
+        List<Repo.TutorSession> mine = Repo.sessionsFor(Repo.ownerName);
+        mine.sort(java.util.Comparator.comparingLong(session -> session.startAtMillis));
         int upcoming = 0;
         Repo.TutorSession next = null;
         for (Repo.TutorSession s : mine) {
-            if (!s.past) { upcoming++; if (next == null) next = s; }
+            if (!Repo.isPast(s, System.currentTimeMillis())) { upcoming++; if (next == null) next = s; }
         }
         Ui.addStatRow(stats, Ui.peso(Repo.myPendingPayout()), getString(R.string.stat_pending),
                 String.valueOf(upcoming), getString(R.string.stat_upcoming));
@@ -81,7 +89,7 @@ public class TutorHomeFragment extends Fragment {
 
         int shown = 0;
         for (Repo.TutorSession s : mine) {
-            if (!s.past || shown >= 3) continue;
+            if (!Repo.isPast(s, System.currentTimeMillis()) || shown >= 3) continue;
             shown++;
             View row = inf.inflate(R.layout.item_menu_row, recent, false);
             ((TextView) row.findViewById(R.id.tv_title)).setText(s.title);

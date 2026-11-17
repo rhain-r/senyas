@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_check_title">Camera check</string>
+    <string name="camera_check_description">Check your camera before your session. This preview stays on your device and does not join a class.</string>
+    <string name="classroom_remote_not_connected">Remote video is not connected. Only your local camera is shown.</string>
+</resources>
